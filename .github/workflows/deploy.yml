@@ -66,7 +66,7 @@ jobs:
 
           mkdir -p ~/.ssh
           # Windows のメモ帳で貼ると入る改行コード(\r)を取り除く
-          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' | sed '/^[[:space:]]*$/d; s/^[[:space:]]*//; s/[[:space:]]*$//' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
           echo "--- 確認1: 秘密鍵の形式"
