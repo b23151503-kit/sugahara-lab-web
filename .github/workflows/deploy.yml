@@ -57,14 +57,64 @@ jobs:
       - name: Deploy via SSH (rsync)
         if: env.SSH_HOST != '' && env.DEPLOY_PATH != ''
         run: |
+          # 値の前後の空白・改行を取り除く(貼り付け時に入りやすい)
+          SSH_HOST=$(printf '%s' "$SSH_HOST" | tr -d '[:space:]')
+          SSH_PORT=$(printf '%s' "$SSH_PORT" | tr -d '[:space:]')
+          SSH_USER=$(printf '%s' "$SSH_USER" | tr -d '[:space:]')
+          DEPLOY_PATH=$(printf '%s' "$DEPLOY_PATH" | tr -d '\r\n' | sed 's/[[:space:]]*$//; s:/*$::')
+          echo "接続先: $SSH_USER@$SSH_HOST (ポート $SSH_PORT)  送り先: $DEPLOY_PATH"
+
           mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          # Windows のメモ帳で貼ると入る改行コード(\r)を取り除く
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
-          rsync -rlz --checksum --itemize-changes \
-            -e "ssh -i ~/.ssh/deploy_key -p $SSH_PORT" \
-            dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+          echo "--- 確認1: 秘密鍵の形式"
+          head -1 ~/.ssh/deploy_key | grep -q -- '-----BEGIN' || { echo "::error::SSH_KEY の先頭が -----BEGIN で始まっていません。.key ファイルの中身を最初の行から全部貼り直してください。"; exit 1; }
+          tail -1 ~/.ssh/deploy_key | grep -q -- '-----END' || { echo "::error::SSH_KEY の最後が -----END ... ----- で終わっていません。最後の行まで全部貼り直してください。"; exit 1; }
+          if ! ssh-keygen -y -P '' -f ~/.ssh/deploy_key > /dev/null 2>/tmp/kerr; then
+            if grep -qi 'passphrase\|incorrect' /tmp/kerr; then
+              echo "::error::この秘密鍵にはパスフレーズが付いています。エックスサーバーで「パスフレーズなし」で鍵を作り直し、SSH_KEY を登録し直してください。"
+            else
+              echo "::error::SSH_KEY が秘密鍵として読めません($(cat /tmp/kerr))。.key ファイルの中身を全部貼り直してください。"
+            fi
+            exit 1
+          fi
+          echo "OK"
+
+          echo "--- 確認2: サーバーにつながるか"
+          if ! timeout 15 bash -c "echo > /dev/tcp/$SSH_HOST/$SSH_PORT" 2>/dev/null; then
+            echo "::error::$SSH_HOST のポート $SSH_PORT につながりません。(1) エックスサーバーの SSH設定 が ON か (2) SSH設定の「国外IPアクセス制限」が OFF か (3) SSH_HOST(サーバーID.xsrv.jp)と SSH_PORT(10022)が正しいか を確認してください。"
+            exit 1
+          fi
+          echo "OK"
+
+          SSH="ssh -i $HOME/.ssh/deploy_key -p $SSH_PORT -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+
+          echo "--- 確認3: ログインできるか"
+          if ! $SSH "$SSH_USER@$SSH_HOST" "echo login-ok" 2>/tmp/serr; then
+            cat /tmp/serr
+            if grep -qi 'permission denied' /tmp/serr; then
+              echo "::error::鍵でログインできません。(1) SSH_USER がサーバーID になっているか (2) SSH_KEY がエックスサーバーで登録した鍵のものか を確認してください。"
+            else
+              echo "::error::SSH でログインできませんでした(上のメッセージを確認)。"
+            fi
+            exit 1
+          fi
+
+          echo "--- 確認4: 送り先フォルダ"
+          parent=$(dirname "$DEPLOY_PATH")
+          if ! $SSH "$SSH_USER@$SSH_HOST" "test -d '$parent'"; then
+            echo "::error::$parent がサーバーにありません。DEPLOY_PATH のサーバーIDやドメイン名を確認してください。サーバー上のフォルダ一覧:"
+            $SSH "$SSH_USER@$SSH_HOST" 'ls -1 ~' || true
+            exit 1
+          fi
+          $SSH "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+          echo "OK"
+
+          echo "--- 配信"
+          rsync -rlz --checksum --itemize-changes -e "$SSH" dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+          echo "完了: 配信しました"
 
       - name: Deploy via FTPS (lftp)
         if: env.SSH_HOST == '' && env.FTP_HOST != '' && env.DEPLOY_PATH != ''
