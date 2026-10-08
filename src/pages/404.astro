@@ -1,0 +1,9 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { url } from '../lib/site';
+---
+<Base title="ページが見つかりません">
+  <PageHead kicker="404" title="ページが見つかりません" lead="URLが変わったか、ページが移動した可能性があります。" />
+  <section class="section"><div class="wrap"><a class="more" href={url('/')}>← トップページへ</a></div></section>
+</Base>

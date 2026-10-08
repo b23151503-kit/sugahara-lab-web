@@ -1,0 +1,47 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+
+const all = (await getCollection('members', ({ data }) => data.status === '在籍')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+const faculty = all.filter((m) => ['教授', '准教授', '助教', '特任教員'].includes(m.data.role));
+const groups = [
+  { label: 'スタッフ Staff', roles: ['研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント'] },
+  { label: '博士課程 Doctoral Course', roles: ['博士課程'] },
+  { label: '修士課程 Master Course', roles: ['修士課程'] },
+  { label: '学部生 Undergraduate', roles: ['学部生'] },
+  { label: '研究生 Research Student', roles: ['研究生'] },
+]
+  .map((g) => ({ ...g, people: all.filter((m) => g.roles.includes(m.data.role)) }))
+  .filter((g) => g.people.length > 0);
+---
+<Base title="メンバー" current="/members/">
+  <PageHead kicker="Members" title="メンバー" lead={`現在 ${all.length} 名が在籍しています。`} />
+  <section class="section">
+    <div class="wrap">
+      {faculty.map((m) => (
+        <div class="pi">
+          <span class="note" style="font-size:13px;font-weight:700;color:var(--gold-text)">{m.data.role}{m.data.note && ` · ${m.data.note}`}</span>
+          <span class="n">{m.data.name}</span>
+          <span style="font-family:var(--sans);color:var(--muted)">{m.data.name_en}</span>
+        </div>
+      ))}
+      {groups.map((g) => (
+        <div class="member-group">
+          <h3>{g.label}</h3>
+          <ul class="member-grid">
+            {g.people.map((m) => (
+              <li>
+                <div class="n">{m.data.name}</div>
+                <div class="e">{m.data.name_en}</div>
+                {g.roles.length > 1 && <div class="note">{m.data.role}</div>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</Base>

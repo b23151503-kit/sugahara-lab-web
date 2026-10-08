@@ -1,0 +1,35 @@
+# 静的サイト用の設定(Apache)
+# 注意: WordPress が動いているディレクトリにこのファイルを上書きすると WordPress が動かなくなります。
+#       本番切り替えまではテスト用ディレクトリ(例: /new/)に配信してください。
+
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# 旧 WordPress の URL から新しいページへ転送(相対パスなのでテスト用ディレクトリでも動きます)
+RewriteRule ^donation-confirmation/?$ about/ [R=301,L]
+RewriteRule ^(technology|category/research|category/technology)/?$ research/ [R=301,L]
+RewriteRule ^(ceramics-coating|semiconductor-packaging|thermoelectrics)/?$ research/$1/ [R=301,L]
+RewriteRule ^events/?$ news/ [R=301,L]
+RewriteRule ^(current|obog|group-photo|category/members)/?$ members/ [R=301,L]
+RewriteRule ^(publications-articles|2026fy)(/.*)?$ publications/ [R=301,L]
+RewriteRule ^contact-us/?$ contact/ [R=301,L]
+RewriteRule ^wp-admin/?.*$ admin/ [R=301,L]
+RewriteRule ^feed/?$ news/ [R=301,L]
+RewriteRule ^(xmlrpc\.php|wp-json(/.*)?|wp-login\.php)$ - [G,L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/json text/plain
+</IfModule>
+
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/jpeg "access plus 30 days"
+ExpiresByType image/png "access plus 30 days"
+ExpiresByType image/svg+xml "access plus 30 days"
+ExpiresByType text/css "access plus 7 days"
+</IfModule>

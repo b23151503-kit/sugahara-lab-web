@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import PubItem from '../components/PubItem.astro';
+
+const key = (p: any) => p.data.date ?? String(p.data.year);
+const pubs = (await getCollection('publications')).sort((a, b) => key(b).localeCompare(key(a)));
+// 年度(4月始まり)でまとめる
+const fy = (p: any) => {
+  const d = p.data.date;
+  if (!d || d.length < 7) return p.data.year;
+  const m = Number(d.slice(5, 7));
+  return m >= 4 ? Number(d.slice(0, 4)) : Number(d.slice(0, 4)) - 1;
+};
+const years = [...new Set(pubs.map(fy))].sort((a, b) => b - a);
+const types = ['論文', '総説・解説', '国際学会', '国内学会', '招待講演', '受賞', '特許'].filter((t) =>
+  pubs.some((p) => p.data.type === t),
+);
+---
+<Base title="業績" current="/publications/">
+  <PageHead kicker="Publications" title="業績" lead={`論文・学会発表など ${pubs.length} 件(年度別)。`} />
+  <section class="section">
+    <div class="wrap">
+      <div class="filters" role="group" aria-label="種別で絞り込み">
+        <button type="button" data-filter="" aria-pressed="true">すべて</button>
+        {types.map((t) => <button type="button" data-filter={t} aria-pressed="false">{t}</button>)}
+      </div>
+      {years.map((y) => (
+        <div class="fy-block">
+          <h2 class="year-head">{y}年度</h2>
+          <ul class="pub-list">
+            {pubs.filter((p) => fy(p) === y).map((p) => (
+              <li data-type={p.data.type}><PubItem pub={p} /></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+  <script is:inline>
+    (() => {
+      const btns = document.querySelectorAll('.filters button');
+      btns.forEach((b) =>
+        b.addEventListener('click', () => {
+          const f = b.dataset.filter;
+          btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          document.querySelectorAll('.pub-list li').forEach((li) => {
+            li.hidden = !!f && li.dataset.type !== f;
+          });
+          document.querySelectorAll('.fy-block').forEach((blk) => {
+            blk.hidden = ![...blk.querySelectorAll('li')].some((li) => !li.hidden);
+          });
+        }),
+      );
+    })();
+  </script>
+</Base>

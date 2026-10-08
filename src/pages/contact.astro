@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { SITE } from '../lib/site';
+---
+<Base title="お問い合わせ" current="/contact/">
+  <PageHead kicker="Contact" title="お問い合わせ" lead="研究室への配属・進学の相談、共同研究や取材のご依頼は下記までご連絡ください。" />
+  <section class="section">
+    <div class="wrap split">
+      <dl class="info">
+        <dt>担当</dt><dd>菅原 徹 教授(工学博士)</dd>
+        <dt>所属</dt><dd>京都工芸繊維大学 材料化学系<br />集積材料・異相界面科学研究分野</dd>
+        <dt>住所</dt><dd>{SITE.address}</dd>
+        <dt>電話</dt><dd><a href={`tel:${SITE.tel.replace(/-/g, '')}`}>{SITE.tel}</a></dd>
+        <dt>メール</dt><dd>{SITE.mailUser}[at]{SITE.mailDomain}<br /><small style="color:var(--muted)">[at] を @ に置き換えてください</small></dd>
+      </dl>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { url, fmtDate } from '../../lib/site';
+
+const news = (await getCollection('news', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const years = [...new Set(news.map((n) => n.data.date.getFullYear()))];
+const href = (n: any) => (n.data.legacy_url && !n.body?.trim() ? n.data.legacy_url : url(`/news/${n.id}/`));
+---
+<Base title="お知らせ" current="/news/">
+  <PageHead kicker="News" title="お知らせ" lead="学会発表、受賞、研究室の出来事をお知らせします。" />
+  <section class="section">
+    <div class="wrap">
+      {years.map((y) => (
+        <>
+          <h2 class="year-head">{y}</h2>
+          <ul class="news-list" style="border-top:0">
+            {news.filter((n) => n.data.date.getFullYear() === y).map((n) => (
+              <li>
+                <a href={href(n)}>
+                  <time datetime={n.data.date.toISOString().slice(0, 10)}>{fmtDate(n.data.date)}</time>
+                  <span class="tag">{n.data.category}</span>
+                  <span class="t">{n.data.title}{n.data.legacy_url && !n.body?.trim() && <span class="ext">(旧サイト)</span>}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,19 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { url } from '../lib/site';
+
+const page = await getEntry('pages', 'about');
+if (!page) throw new Error('src/content/pages/about.md がありません');
+const { Content } = await render(page);
+---
+<Base title={page.data.title} current="/about/">
+  <PageHead kicker={page.data.title_en ?? 'About'} title={page.data.title} lead={page.data.lead} />
+  <section class="section">
+    <div class="wrap split">
+      <div class="prose"><Content /></div>
+      {page.data.image && <img src={url(page.data.image)} alt="研究室メンバーの集合写真" loading="lazy" />}
+    </div>
+  </section>
+</Base>

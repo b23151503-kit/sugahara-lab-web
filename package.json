@@ -1,0 +1,19 @@
+{
+  "name": "sugahara-lab-web",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "京都工芸繊維大学 菅原研究室ホームページ(静的サイト)",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:dist": "node scripts/check-dist.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

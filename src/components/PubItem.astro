@@ -1,0 +1,15 @@
+---
+interface Props { pub: any; showType?: boolean }
+const { pub, showType = true } = Astro.props;
+const d = pub.data;
+const link = d.doi ? `https://doi.org/${d.doi}` : d.url;
+const when = d.date ?? String(d.year);
+---
+<div class="pub-title">
+  {showType && <span class="pub-type">{d.type}</span>}
+  {link ? <a href={link} rel="noopener">{d.title}</a> : d.title}
+  {d.note && <span class="pub-note">{d.note}</span>}
+</div>
+<div class="pub-meta">
+  {d.authors.join(', ')} — <span class="venue">{d.venue}</span>{d.volume_pages && <>, {d.volume_pages}</>} ({when.replace(/-/g, '.')})
+</div>

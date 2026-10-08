@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { url, fmtDate } from '../../lib/site';
+
+export async function getStaticPaths() {
+  // 本文がある記事だけページを作る(本文のない旧記事は旧サイトへリンク)
+  const items = await getCollection('news', ({ data }) => !data.draft);
+  return items
+    .filter((n) => n.body && n.body.trim().length > 0)
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={entry.data.title} current="/news/">
+  <PageHead kicker={`${fmtDate(entry.data.date)} · ${entry.data.category}`} title={entry.data.title} />
+  <section class="section">
+    <div class="wrap">
+      <article class="prose">
+        {entry.data.image && <img src={url(entry.data.image)} alt="" />}
+        <Content />
+      </article>
+      <p style="margin-top:48px"><a class="more" href={url('/news/')}>← お知らせ一覧へ</a></p>
+    </div>
+  </section>
+</Base>

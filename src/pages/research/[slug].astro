@@ -1,0 +1,22 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { url } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const items = await getCollection('research');
+  return items.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<Base title={entry.data.title_ja} description={entry.data.summary} current="/research/">
+  <PageHead kicker={entry.data.title} title={entry.data.title_ja} lead={entry.data.summary} />
+  <section class="section">
+    <div class="wrap">
+      <article class="prose"><Content /></article>
+      <p style="margin-top:48px"><a class="more" href={url('/research/')}>← 研究内容一覧へ</a></p>
+    </div>
+  </section>
+</Base>

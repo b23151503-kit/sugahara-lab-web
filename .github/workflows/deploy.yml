@@ -1,0 +1,80 @@
+# main に変更が入るたびにサイトを組み立て、研究室のサーバーへ送る。
+# サーバー情報は Settings > Secrets and variables > Actions に登録する(README 参照)。
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Tokyo
+      SITE_BASE: ${{ vars.SITE_BASE || '/' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://kit-sugahara-lab.net' }}
+      # SSH(rsync) で送る場合
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      # FTP(FTPS) で送る場合
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      # 送り先ディレクトリ(例: /home/xxx/kit-sugahara-lab.net/public_html/new)
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Check output
+        run: npm run check:dist
+
+      - name: Keep build result
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist
+          include-hidden-files: true
+          retention-days: 7
+
+      # --delete は使わない(サーバーにしかないファイルを消さないため)
+      - name: Deploy via SSH (rsync)
+        if: env.SSH_HOST != '' && env.DEPLOY_PATH != ''
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "mkdir -p '$DEPLOY_PATH'"
+          rsync -rlz --checksum --itemize-changes \
+            -e "ssh -i ~/.ssh/deploy_key -p $SSH_PORT" \
+            dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      - name: Deploy via FTPS (lftp)
+        if: env.SSH_HOST == '' && env.FTP_HOST != '' && env.DEPLOY_PATH != ''
+        run: |
+          sudo apt-get -qq update && sudo apt-get -qq install -y lftp
+          lftp -c "set ftp:ssl-force true; set ssl:verify-certificate no; \
+            open -u \"$FTP_USER\",\"$FTP_PASSWORD\" \"$FTP_HOST\"; \
+            mkdir -p -f \"$DEPLOY_PATH\"; \
+            mirror -R --verbose --only-newer --no-perms dist/ \"$DEPLOY_PATH\""
+
+      - name: No deploy target
+        if: env.SSH_HOST == '' && env.FTP_HOST == ''
+        run: echo "::notice::サーバー情報が未登録のため、ビルドのみ行いました(Actions の成果物 'site' から確認できます)。"

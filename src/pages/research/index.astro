@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import { url } from '../../lib/site';
+
+const research = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="研究内容" current="/research/">
+  <PageHead kicker="Research" title="研究内容" lead="材料化学を基盤に、材料・デバイスとその製造プロセス技術を研究しています。" />
+  <section class="section">
+    <div class="wrap">
+      <div class="cards">
+        {research.map((r) => (
+          <a class="card" href={url(`/research/${r.id}/`)}>
+            <div class="img">{r.data.image && <img src={url(r.data.image)} alt="" loading="lazy" />}</div>
+            <div class="body">
+              <span class="en">{r.data.title}</span>
+              <span class="ja">{r.data.title_ja}</span>
+              <p>{r.data.summary}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,117 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PubItem from '../components/PubItem.astro';
+import { SITE, url, fmtDate } from '../lib/site';
+
+const news = (await getCollection('news', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+const research = (await getCollection('research')).sort((a, b) => a.data.order - b.data.order);
+const pubs = (await getCollection('publications', ({ data }) => data.type === '論文' || data.type === '国際学会'))
+  .sort((a, b) => (b.data.date ?? String(b.data.year)).localeCompare(a.data.date ?? String(a.data.year)))
+  .slice(0, 5);
+const newsHref = (n: any) => (n.data.legacy_url && !n.body?.trim() ? n.data.legacy_url : url(`/news/${n.id}/`));
+---
+<Base overlayHeader current="/">
+  <section class="hero" aria-label="トップ">
+    <img class="hero-bg" src={url('/images/hero.jpg')} alt="" fetchpriority="high" />
+    <div class="hero-scrim"></div>
+    <div class="hero-main">
+      <div class="wrap">
+        <div class="eyebrow">{SITE.affiliation} {SITE.nameJa}</div>
+        <h1>{SITE.nameEn}</h1>
+        <p>セラミックスコーティング、半導体実装技術、熱電変換技術。異なる材料を集積し、その界面で起こる現象を理解することで、次世代デバイスを支える材料技術を研究しています。</p>
+        <div class="btns">
+          <a class="btn btn-gold" href={url('/research/')}>
+            <span>研究内容を見る</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </a>
+          <a class="btn btn-line" href={url('/members/')}>メンバー</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-foot">
+      <div class="wrap">
+        <nav aria-label="研究テーマ">
+          {research.map((r) => <a href={url(`/research/${r.id}/`)}>{r.data.title}</a>)}
+        </nav>
+        <a class="scroll" href="#news">
+          <span>SCROLL</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="news">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>お知らせ <span>News</span></h2>
+        <a class="more" href={url('/news/')}>すべて見る →</a>
+      </div>
+      <ul class="news-list">
+        {news.map((n) => (
+          <li>
+            <a href={newsHref(n)}>
+              <time datetime={n.data.date.toISOString().slice(0, 10)}>{fmtDate(n.data.date)}</time>
+              <span class="tag">{n.data.category}</span>
+              <span class="t">{n.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>研究内容 <span>Research</span></h2>
+        <a class="more" href={url('/research/')}>研究内容へ →</a>
+      </div>
+      <div class="cards">
+        {research.map((r) => (
+          <a class="card" href={url(`/research/${r.id}/`)}>
+            <div class="img">{r.data.image && <img src={url(r.data.image)} alt="" loading="lazy" />}</div>
+            <div class="body">
+              <span class="en">{r.data.title}</span>
+              <span class="ja">{r.data.title_ja}</span>
+              <p>{r.data.summary}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>最近の業績 <span>Publications</span></h2>
+        <a class="more" href={url('/publications/')}>業績一覧へ →</a>
+      </div>
+      <ul class="pub-list">
+        {pubs.map((p) => <li><PubItem pub={p} /></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split">
+      <div>
+        <div class="section-head"><h2>アクセス <span>Access</span></h2></div>
+        <dl class="info">
+          <dt>所属</dt><dd>{SITE.affiliation}</dd>
+          <dt>住所</dt><dd>{SITE.address}</dd>
+          <dt>電話</dt><dd>{SITE.tel}</dd>
+        </dl>
+      </div>
+      <div>
+        <div class="section-head"><h2>お問い合わせ <span>Contact</span></h2></div>
+        <p style="margin:0 0 20px">研究室への配属・進学の相談、共同研究や取材のご依頼はこちらから。</p>
+        <a class="btn" style="background:var(--ink);color:#fff" href={url('/contact/')}>お問い合わせ先を見る</a>
+      </div>
+    </div>
+  </section>
+</Base>
