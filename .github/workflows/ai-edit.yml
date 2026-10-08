@@ -1,0 +1,210 @@
+# AI に原稿を整えてもらい、プルリクエスト(変更案)を作るワークフロー。
+#
+# 使い方は2通り:
+#   1. inbox/ にメモ・写真・BibTeX を置いて main に入れる
+#   2. Issue の本文かコメントに「@ai」と書いて依頼する
+#
+# 使う AI は Secrets に登録したキーで自動的に決まる(Variables の AI_PROVIDER で固定も可):
+#   GEMINI_API_KEY があれば Gemini(無料枠あり) → なければ ANTHROPIC_API_KEY / CLAUDE_CODE_OAUTH_TOKEN で Claude
+# GitHub Copilot を使う場合はこのワークフローは使わず、Issue の Assignees で Copilot を選ぶ(docs/SETUP.md)。
+name: AI editing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'inbox/**'
+      - '!inbox/README.md'
+      - '!inbox/.gitkeep'
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+concurrency:
+  group: ai-edit-${{ github.event.issue.number || 'inbox' }}
+  cancel-in-progress: false
+
+jobs:
+  ai-edit:
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@ai') || contains(github.event.issue.title, '@ai'))) ||
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request && contains(github.event.comment.body, '@ai') && github.event.comment.user.type != 'Bot')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+      id-token: write
+    env:
+      TZ: Asia/Tokyo
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HAS_GEMINI: ${{ secrets.GEMINI_API_KEY != '' }}
+      HAS_CLAUDE: ${{ secrets.ANTHROPIC_API_KEY != '' || secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+      AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare request
+        id: req
+        env:
+          EVENT: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          mkdir -p .ai
+          if [ "$EVENT" = "issues" ] || [ "$EVENT" = "issue_comment" ]; then
+            {
+              echo "# 依頼(Issue #$ISSUE_NUMBER)"
+              echo
+              echo "## タイトル"
+              echo "$ISSUE_TITLE"
+              echo
+              echo "## 本文"
+              echo "$ISSUE_BODY"
+              if [ -n "$COMMENT_BODY" ]; then
+                echo
+                echo "## 追加のコメント(これが最新の指示)"
+                echo "$COMMENT_BODY"
+              fi
+            } > .ai/request.md
+            echo "mode=issue" >> "$GITHUB_OUTPUT"
+            echo "branch=ai/issue-$ISSUE_NUMBER-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            n=$(find inbox -type f ! -name README.md ! -name .gitkeep | wc -l)
+            echo "# 依頼" > .ai/request.md
+            echo "inbox/ に置かれたファイル($n 件)を、AGENTS.md の「inbox の処理」に従って反映してください。" >> .ai/request.md
+            echo "mode=inbox" >> "$GITHUB_OUTPUT"
+            echo "branch=ai/inbox-${{ github.run_id }}" >> "$GITHUB_OUTPUT"
+            if [ "$n" = "0" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
+          fi
+          p="$AI_PROVIDER"
+          if [ -z "$p" ]; then
+            if [ "$HAS_GEMINI" = "true" ]; then p=gemini; elif [ "$HAS_CLAUDE" = "true" ]; then p=claude; else p=none; fi
+          fi
+          echo "provider=$p" >> "$GITHUB_OUTPUT"
+          echo "AI: $p"
+
+      - name: No AI key
+        if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'none'
+        run: |
+          echo "::error::AI のキーが登録されていません。Settings → Secrets and variables → Actions に GEMINI_API_KEY を登録してください(docs/SETUP.md)。"
+          exit 1
+
+      - name: Ask Gemini
+        if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'gemini'
+        uses: google-github-actions/run-gemini-cli@v0
+        env:
+          GEMINI_CLI_TRUST_WORKSPACE: 'true'
+        with:
+          gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+          gemini_model: ${{ vars.GEMINI_MODEL }}
+          settings: |
+            {
+              "context": { "fileName": ["AGENTS.md"] },
+              "general": { "defaultApprovalMode": "auto_edit" },
+              "tools": {
+                "allowed": [
+                  "read_file", "read_many_files", "list_directory", "glob", "search_file_content",
+                  "write_file", "replace",
+                  "run_shell_command(mkdir)", "run_shell_command(mv)", "run_shell_command(rm)", "run_shell_command(ls)", "run_shell_command(cp)"
+                ]
+              }
+            }
+          prompt: |
+            あなたは菅原研究室ホームページの編集担当です。AGENTS.md のルールに必ず従ってください。
+            今回の依頼は .ai/request.md に書かれています。読んで、その通りに src/content/ などのファイルを作成・変更してください。
+            既存のファイルの書き方(src/content/ の他のファイル)を必ず参考にし、src/content.config.ts の選択肢以外の値は使わないでください。
+            書かれていない事実を推測で補わないでください。
+            最後に、作成・変更したファイルと「要確認」の点を日本語の箇条書きで .ai/report.md に書いてください。
+            git の commit や push はしないでください。
+
+      - name: Ask Claude
+        if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'claude'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            あなたは菅原研究室ホームページの編集担当です。AGENTS.md のルールに必ず従ってください。
+            今回の依頼は .ai/request.md に書かれています。読んで、その通りに src/content/ などのファイルを作成・変更してください。
+            最後に、作成・変更したファイルと「要確認」の点を日本語の箇条書きで .ai/report.md に書いてください。
+            git の commit や push はしないでください。
+          claude_args: |
+            --max-turns 40
+            --allowedTools Read,Write,Edit,Glob,Grep,Bash(mkdir:*),Bash(mv:*),Bash(rm:*),Bash(ls:*),Bash(cp:*)
+
+      - uses: actions/setup-node@v4
+        if: steps.req.outputs.skip != 'true'
+        with:
+          node-version: 22
+
+      - name: Build check
+        id: build
+        if: steps.req.outputs.skip != 'true'
+        continue-on-error: true
+        run: |
+          rm -rf .gemini
+          npm install --no-audit --no-fund
+          npm run build 2>&1 | tail -40 | tee .ai/build.log
+          test "${PIPESTATUS[0]}" = "0"
+          npm run check:dist
+
+      - name: Write PR body
+        id: body
+        if: steps.req.outputs.skip != 'true'
+        run: |
+          {
+            echo "## AI(${{ steps.req.outputs.provider }})が作成した変更案"
+            echo
+            if [ -f .ai/report.md ]; then cat .ai/report.md; else echo "(報告なし。Files changed タブで変更内容を確認してください)"; fi
+            echo
+            if [ "${{ steps.build.outcome }}" != "success" ]; then
+              echo "### ⚠ サイトの組み立て(ビルド)に失敗しました"
+              echo "このままマージしないでください。エラーの最後:"
+              echo '```'
+              tail -20 .ai/build.log 2>/dev/null
+              echo '```'
+            else
+              echo "### ✓ サイトの組み立て(ビルド)は成功しました"
+            fi
+            echo
+            echo "---"
+            echo "**確認のしかた**: 上の「Files changed」タブで文章を確認 → 数分後にプレビュー(https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)で見た目を確認 → 問題なければ「Merge pull request」。"
+            if [ "${{ steps.req.outputs.mode }}" = "issue" ]; then echo; echo "Closes #${{ github.event.issue.number }}"; fi
+          } > .ai/pr-body.md
+
+      - name: Open pull request
+        id: pr
+        if: steps.req.outputs.skip != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: ${{ steps.req.outputs.branch }}
+          commit-message: "AI(${{ steps.req.outputs.provider }}): 原稿を作成・更新"
+          title: "${{ steps.build.outcome != 'success' && '[ビルド失敗] ' || '' }}AIによる変更案: ${{ steps.req.outputs.mode == 'issue' && github.event.issue.title || 'inbox の反映' }}"
+          body-path: .ai/pr-body.md
+          add-paths: |
+            src/content/**
+            public/uploads/**
+            inbox/**
+
+      - name: Reply on issue
+        if: steps.req.outputs.mode == 'issue' && steps.req.outputs.skip != 'true'
+        run: |
+          if [ -n "${{ steps.pr.outputs.pull-request-url }}" ]; then
+            gh issue comment ${{ github.event.issue.number }} --body "変更案を作りました: ${{ steps.pr.outputs.pull-request-url }} (数分後にプレビューにも反映されます)"
+          else
+            gh issue comment ${{ github.event.issue.number }} --body "AI が変更を作れませんでした。依頼内容をもう少し具体的にして、もう一度「@ai」とコメントしてください。実行ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          fi
+
+      - name: Start preview
+        if: steps.pr.outputs.pull-request-url != ''
+        run: gh workflow run preview.yml -f branch=${{ steps.req.outputs.branch }}

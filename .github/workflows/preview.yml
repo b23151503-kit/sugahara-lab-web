@@ -1,31 +1,57 @@
-# 手動実行用: ビルド結果を preview-build ブランチに置く(サーバーに送らずに中身を確認したいとき)。
-name: Preview build
+# 本番サーバーに送る前に、見た目を確認するためのプレビュー。
+# GitHub Pages(https://<ユーザー名>.github.io/sugahara-lab-web/)に公開される。
+#  - main が更新されると自動で main の内容を表示
+#  - AI の変更案ができると、その変更案の内容を表示
+#  - Actions → Preview → Run workflow でブランチ名を指定すれば、任意の変更案を表示
+name: Preview
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 表示したいブランチ名(変更案のブランチ。空なら main)
+        required: false
+        default: main
 
-permissions:
-  contents: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
-  preview:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       TZ: Asia/Tokyo
+      SITE_BASE: /${{ github.event.repository.name }}
+      SITE_URL: https://${{ github.repository_owner }}.github.io
+      PREVIEW_LABEL: ${{ inputs.branch || 'main' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || 'main' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run build
       - run: npm run check:dist
-      - name: Push to preview-build branch
-        run: |
-          cd dist
-          git init -q -b preview-build
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -q -m "preview build ${{ github.sha }}"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" preview-build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

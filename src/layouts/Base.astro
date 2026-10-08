@@ -11,6 +11,8 @@ interface Props {
 const { title, description = SITE.description, overlayHeader = false, current = '' } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE.nameJa}` : `${SITE.nameJa} | ${SITE.nameEn}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// プレビュー(GitHub Pages)用のビルドのときだけ表示する目印
+const previewLabel = process.env.PREVIEW_LABEL;
 ---
 <!doctype html>
 <html lang="ja">
@@ -19,6 +21,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{fullTitle}</title>
   <meta name="description" content={description} />
+  {previewLabel && <meta name="robots" content="noindex, nofollow" />}
   <link rel="canonical" href={canonical} />
   <meta property="og:title" content={fullTitle} />
   <meta property="og:description" content={description} />
@@ -64,5 +67,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <div class="copy">© {new Date().getFullYear()} {SITE.name} Kyoto Institute of Technology</div>
     </div>
   </footer>
+  {previewLabel && (
+    <div class="preview-badge" role="status">プレビュー表示中(ブランチ: {previewLabel})— 本番サイトではありません</div>
+  )}
 </body>
 </html>
