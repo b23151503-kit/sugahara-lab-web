@@ -1,0 +1,112 @@
+# Sveltia CMS の設定。ログインは「Sign In with Token」で GitHub の個人アクセストークンを使います(README 参照)。
+backend:
+  name: github
+  repo: b23151503-kit/sugahara-lab-web
+  branch: main
+  commit_messages:
+    create: "{{collection}}: 「{{slug}}」を追加"
+    update: "{{collection}}: 「{{slug}}」を更新"
+    delete: "{{collection}}: 「{{slug}}」を削除"
+
+locale: ja
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: news
+    label: お知らせ
+    label_singular: お知らせ
+    folder: src/content/news
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{fields._slug}}"
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY.MM.DD')}} {{title}}"
+    fields:
+      - { label: タイトル, name: title, widget: string }
+      - { label: 日付, name: date, widget: datetime, time_format: false, date_format: "YYYY-MM-DD", format: "YYYY-MM-DD" }
+      - label: カテゴリ
+        name: category
+        widget: select
+        options: [学会発表, 受賞, 論文, プレス, 研究活動, 研究室生活, お知らせ]
+        default: お知らせ
+      - { label: アイキャッチ画像, name: image, widget: image, required: false }
+      - { label: 下書き(公開しない), name: draft, widget: boolean, default: false, required: false }
+      - { label: 旧サイトの記事URL(本文がない旧記事のみ), name: legacy_url, widget: string, required: false }
+      - { label: 本文, name: body, widget: markdown, required: false }
+
+  - name: publications
+    label: 業績
+    label_singular: 業績
+    folder: src/content/publications
+    extension: yml
+    format: yaml
+    create: true
+    slug: "{{fields.year}}-{{fields._slug}}"
+    identifier_field: title
+    summary: "[{{type}}] {{year}} {{title}}"
+    fields:
+      - label: 種別
+        name: type
+        widget: select
+        options: [論文, 総説・解説, 国際学会, 国内学会, 招待講演, 受賞, 特許]
+      - { label: タイトル, name: title, widget: string }
+      - { label: 著者(1人ずつ), name: authors, widget: list, field: { label: 著者, name: author, widget: string } }
+      - { label: 掲載誌・会議名, name: venue, widget: string }
+      - { label: 年, name: year, widget: number, value_type: int }
+      - { label: 日付(例 2026-03-15 / 2026-04), name: date, widget: string, required: false }
+      - { label: 巻・号・ページ, name: volume_pages, widget: string, required: false }
+      - { label: DOI(10.xxxx/... の部分のみ), name: doi, widget: string, required: false }
+      - { label: URL, name: url, widget: string, required: false }
+      - { label: 備考(口頭発表・受賞記念講演など), name: note, widget: string, required: false }
+
+  - name: members
+    label: メンバー
+    label_singular: メンバー
+    folder: src/content/members
+    extension: yml
+    format: yaml
+    create: true
+    slug: "{{fields._slug}}"
+    identifier_field: name
+    summary: "{{role}} {{name}}({{status}})"
+    fields:
+      - { label: 氏名, name: name, widget: string }
+      - { label: 氏名(英語), name: name_en, widget: string, required: false }
+      - label: 区分
+        name: role
+        widget: select
+        options: [教授, 准教授, 助教, 特任教員, 研究員, 技術補佐員, 事務補佐員, リサーチアシスタント, 博士課程, 修士課程, 学部生, 研究生]
+      - { label: 在籍状況, name: status, widget: select, options: [在籍, 卒業・修了], default: 在籍 }
+      - { label: 並び順(小さいほど上), name: order, widget: number, value_type: int, default: 100 }
+      - { label: 写真, name: photo, widget: image, required: false }
+      - { label: 補足(学位など), name: note, widget: string, required: false }
+      - { label: 卒業・修了年月, name: graduated, widget: string, required: false }
+
+  - name: research
+    label: 研究テーマ
+    folder: src/content/research
+    extension: md
+    format: frontmatter
+    create: true
+    fields:
+      - { label: 英語名, name: title, widget: string }
+      - { label: 日本語名, name: title_ja, widget: string }
+      - { label: 並び順, name: order, widget: number, value_type: int }
+      - { label: 概要(一覧に出る1〜2文), name: summary, widget: text }
+      - { label: 画像, name: image, widget: image, required: false }
+      - { label: 本文, name: body, widget: markdown }
+
+  - name: pages
+    label: 固定ページ
+    files:
+      - name: about
+        label: 研究室について
+        file: src/content/pages/about.md
+        fields:
+          - { label: タイトル, name: title, widget: string }
+          - { label: 英語見出し, name: title_en, widget: string, required: false }
+          - { label: リード文, name: lead, widget: text, required: false }
+          - { label: 画像, name: image, widget: image, required: false }
+          - { label: 本文, name: body, widget: markdown }
