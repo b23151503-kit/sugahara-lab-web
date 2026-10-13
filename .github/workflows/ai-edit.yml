@@ -146,11 +146,7 @@ jobs:
           else
             why="Gemini でエラーが起きました。"
           fi
-          body="AI(Gemini)による処理に失敗したため、変更案は作られていません。
-
-理由: $why
-
-実行ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body=$(printf 'AI(Gemini)による処理に失敗したため、変更案は作られていません。\n\n理由: %s\n\n実行ログ: %s' "$why" "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}")
           if [ -n "${{ github.event.issue.number }}" ]; then
             gh issue comment ${{ github.event.issue.number }} --body "$body" || true
           else
