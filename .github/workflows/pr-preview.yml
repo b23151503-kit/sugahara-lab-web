@@ -1,0 +1,76 @@
+# 変更案(プルリクエスト)ができたら・更新されたら、自動でプレビューに表示する。
+# あわせて、変更案の「後片付け」をする:
+#  - Issue に貼った画像(github.com/user-attachments/...)をダウンロードして public/uploads/YYYY/ に置き、原稿のアドレスを書き換える
+#  - 原稿と関係のない package-lock.json が入っていたら取り除く
+# Copilot が作った変更案では、最初に PR 画面の「Approve and run workflows」を押す必要がある場合があります。
+# 手動で動かすとき: Actions → PR preview → Run workflow で、ブランチ名(例 copilot/xxxx)を入れる。
+name: PR preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 変更案のブランチ名(PR 画面の「from」の右に出ている名前)
+        required: true
+
+concurrency:
+  group: pr-preview-${{ github.head_ref || inputs.branch }}
+  cancel-in-progress: true
+
+jobs:
+  tidy-and-preview:
+    # 外部(フォーク)からの PR では動かさない
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      TZ: Asia/Tokyo
+      BRANCH: ${{ github.head_ref || inputs.branch }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BRANCH }}
+          fetch-depth: 0
+
+      - name: Download pasted images into public/uploads
+        # 変更案のブランチが古くてもいいように、スクリプトは main のものを使う
+        run: |
+          python3 -m pip install --quiet --break-system-packages pillow || true
+          git show origin/main:scripts/localize-images.py > "$RUNNER_TEMP/localize-images.py"
+          python3 "$RUNNER_TEMP/localize-images.py" --root "$PWD"
+
+      - name: Remove unrelated files
+        run: |
+          # main に無い package-lock.json は、原稿と関係ないので取り除く
+          if [ -f package-lock.json ] && ! git cat-file -e origin/main:package-lock.json 2>/dev/null; then
+            git rm -q --cached package-lock.json && rm -f package-lock.json
+            echo "package-lock.json を取り除きました"
+          fi
+
+      - name: Commit tidy-up
+        run: |
+          git add -A src/content public/uploads
+          if git diff --cached --quiet; then
+            echo "片付けるものはありませんでした"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+            git commit -q -m "画像をサイト内に保存し、不要なファイルを削除(自動)"
+            git push -q origin "HEAD:$BRANCH"
+          fi
+
+      - name: Start preview
+        run: gh workflow run preview.yml -f branch="$BRANCH"
+
+      - name: Tell the URL on the pull request
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "数分後にプレビューに表示されます: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/ (左下に「$BRANCH」と出ていればこの変更案の表示です)"
