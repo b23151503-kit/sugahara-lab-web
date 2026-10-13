@@ -54,6 +54,25 @@ def download(url: str) -> tuple[bytes, str] | None:
     return None
 
 
+def shrink(path: Path, limit: int = 1600) -> None:
+    """スマホ写真は大きすぎるので、長い辺を limit px に縮める(Pillow があるときだけ)"""
+    try:
+        from PIL import Image, ImageOps
+    except ImportError:
+        return
+    try:
+        im = ImageOps.exif_transpose(Image.open(path))
+        if max(im.size) <= limit and path.stat().st_size < 600_000:
+            return
+        im.thumbnail((limit, limit))
+        if path.suffix == '.jpg':
+            im.convert('RGB').save(path, quality=84, optimize=True, progressive=True)
+        else:
+            im.save(path, optimize=True)
+    except Exception as e:  # 縮小に失敗しても元の画像はそのまま使う
+        print(f'::warning::画像の縮小に失敗: {path.name} ({e})')
+
+
 def year_of(path: Path) -> str:
     m = re.match(r'(20\d\d)-', path.name)
     return m.group(1) if m else str(date.today().year)
@@ -83,6 +102,7 @@ def main() -> int:
                     break
                 n += 1
             dest.write_bytes(data)
+            shrink(dest)
             text = text.replace(url, f'/uploads/{year}/{name}')
             print(f'{url} → /uploads/{year}/{name}')
             changed += 1

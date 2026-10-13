@@ -43,6 +43,7 @@ jobs:
       - name: Download pasted images into public/uploads
         # 変更案のブランチが古くてもいいように、スクリプトは main のものを使う
         run: |
+          pip install --quiet pillow || true
           git show origin/main:scripts/localize-images.py > "$RUNNER_TEMP/localize-images.py"
           python3 "$RUNNER_TEMP/localize-images.py" --root "$PWD"
 
