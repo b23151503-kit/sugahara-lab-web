@@ -123,6 +123,7 @@ jobs:
             今回の依頼は .ai/request.md に書かれています。読んで、その通りに src/content/ などのファイルを作成・変更してください。
             既存のファイルの書き方(src/content/ の他のファイル)を必ず参考にし、src/content.config.ts の選択肢以外の値は使わないでください。
             書かれていない事実を推測で補わないでください。
+            業績を追加したときは、AGENTS.md の「研究テーマの見直し」に従い、筆頭著者・筆頭発表者のメンバーの theme を見直して報告に旧→新を書いてください。
             最後に、作成・変更したファイルと「要確認」の点を日本語の箇条書きで .ai/report.md に書いてください。
             git の commit や push はしないでください。
 
@@ -136,6 +137,7 @@ jobs:
           prompt: |
             あなたは菅原研究室ホームページの編集担当です。AGENTS.md のルールに必ず従ってください。
             今回の依頼は .ai/request.md に書かれています。読んで、その通りに src/content/ などのファイルを作成・変更してください。
+            業績を追加したときは、AGENTS.md の「研究テーマの見直し」に従い、筆頭著者・筆頭発表者のメンバーの theme を見直して報告に旧→新を書いてください。
             最後に、作成・変更したファイルと「要確認」の点を日本語の箇条書きで .ai/report.md に書いてください。
             git の commit や push はしないでください。
           claude_args: |
@@ -154,8 +156,13 @@ jobs:
         run: |
           rm -rf .gemini
           npm install --no-audit --no-fund
-          npm run build 2>&1 | tail -40 | tee .ai/build.log
-          test "${PIPESTATUS[0]}" = "0"
+          set +e
+          npm run build > .ai/build-full.log 2>&1; rc=$?
+          set -e
+          tail -40 .ai/build-full.log | tee .ai/build.log
+          # 研究テーマの見直し候補(筆頭業績が theme_basis より新しいメンバー)
+          sed 's/\x1b\[[0-9;]*m//g' .ai/build-full.log | grep -a "\[研究テーマ要見直し\]" | sort -u > .ai/theme-review.txt || true
+          test "$rc" = "0"
           SKIP_FONT_CHECK=1 npm run check:dist
 
       - name: Write PR body
@@ -175,6 +182,12 @@ jobs:
               echo '```'
             else
               echo "### ✓ サイトの組み立て(ビルド)は成功しました"
+            fi
+            if [ -s .ai/theme-review.txt ]; then
+              echo
+              echo "### 研究テーマの見直し候補"
+              echo "筆頭著者・筆頭発表者の新しい業績があるのに、研究テーマ(theme)がまだ更新されていないメンバーです。AI の提案(報告欄)を確認し、必要なら \`theme\` と \`theme_basis\` を直してください。"
+              sed 's/^.*\[研究テーマ要見直し\] /- /' .ai/theme-review.txt
             fi
             echo
             echo "---"

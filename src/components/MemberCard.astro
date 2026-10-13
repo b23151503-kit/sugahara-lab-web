@@ -87,7 +87,7 @@ const dialogId = `member-${m.id}`;
       <div class="md-body">
         {(d.theme || d.researchmap || d.website || d.societies) && (
           <dl class="info">
-            {d.theme && <><dt>研究テーマ</dt><dd>{d.theme}</dd></>}
+            {d.theme && <><dt>研究テーマ</dt><dd class="theme-dd">{d.theme}</dd></>}
             {d.societies && <><dt>所属学会</dt><dd>{d.societies}</dd></>}
             {d.website && <><dt>Website</dt><dd><a class="ext-link" href={d.website} target="_blank" rel="noopener">{d.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a></dd></>}
             {d.researchmap && <><dt>researchmap</dt><dd><a class="ext-link" href={d.researchmap} target="_blank" rel="noopener">{d.researchmap.replace(/^https?:\/\//, '')}</a></dd></>}

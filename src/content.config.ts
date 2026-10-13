@@ -47,6 +47,8 @@ const members = defineCollection({
     photo: z.string().optional(),
     note: z.string().optional(),
     theme: z.string().optional(), // 研究テーマ(文章)
+    // theme を書いたときに考慮した、筆頭著者・筆頭発表者の最新業績の日付(例 2026-09-18)。これより新しい筆頭業績が入ると見直し候補になる
+    theme_basis: z.union([z.string(), z.date().transform((d) => d.toISOString().slice(0, 10))]).optional(),
     keywords: z.array(z.string()).optional(), // 研究キーワード(名前の下に表示)
     researchmap: z.string().url().optional(), // researchmap の URL
     // 経歴(年表)。[{ date: 2022年4月, text: 京都工芸繊維大学 教授 }, ...] の形。文章1つでも可
