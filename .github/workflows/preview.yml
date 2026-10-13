@@ -44,7 +44,14 @@ jobs:
           find /tmp/monapo -name "*.ttf" | head -1 > /tmp/monapo-path
           cat /tmp/monapo-path
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Build
+        run: |
+          set -o pipefail
+          if ! npm run build 2>&1 | tee build.log; then
+            # 失敗の理由を画面上部(Annotations)に出す
+            grep -iE "error|invalid|failed|expected|does not match" build.log | head -8 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
       - name: Font subset
         run: |
           export MONAPO_LICENSE=$(find /tmp/monapo -iname "copyright" | head -1)
