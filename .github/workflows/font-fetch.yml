@@ -11,19 +11,15 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - name: Look for the font
+      - name: Download IPA Mona fonts
         run: |
           mkdir -p out && cd out
-          sudo apt-get -qq update
-          apt-cache search mona | tee apt-mona.txt
-          apt-cache search ipafont | tee apt-ipa.txt
-          for pkg in fonts-ipafont-mona fonts-ipamonafont ttf-ipamonafont fonts-mona; do
-            if apt-get download "$pkg" 2>/dev/null; then echo "got $pkg"; fi
-          done
-          for f in *.deb; do [ -f "$f" ] && dpkg-deb -x "$f" "x-${f%.deb}"; done
+          F=opfc-ModuleHP-1.1.1_withIPAMonaFonts-1.0.8.tar.gz
+          curl -fsSL "http://distcache.FreeBSD.org/local-distfiles/hrs/$F" -o "$F"
+          echo "ab77beea3b051abf606cd8cd3badf6cb24141ef145c60f508fcfef1e3852bb9d  $F" | sha256sum -c -
+          tar xzf "$F" && rm "$F"
           find . -iname "*.ttf" -o -iname "*.otf" -o -iname "*.ttc" | tee fonts.txt
-          find . -iname "*license*" -o -iname "copyright" | tee licenses.txt
-          rm -f *.deb
+          find . -iname "*license*" -o -iname "*readme*" | tee docs.txt
       - name: Save to font-src branch
         run: |
           cd out
