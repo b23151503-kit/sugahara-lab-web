@@ -50,7 +50,7 @@ collections:
       - label: 種別
         name: type
         widget: select
-        options: [論文, 総説・解説, 書籍, 国際学会, 国内学会, 招待講演, 受賞, 特許]
+        options: [論文, 総説・解説, 書籍, 国際学会, 国内学会, 招待講演, 受賞, 助成金, 特許]
       - { label: タイトル, name: title, widget: string }
       - { label: 著者(1人ずつ), name: authors, widget: list, field: { label: 著者, name: author, widget: string } }
       - { label: 掲載誌・会議名, name: venue, widget: string }
@@ -61,6 +61,7 @@ collections:
       - { label: URL, name: url, widget: string, required: false }
       - { label: 備考(口頭発表・受賞記念講演など), name: note, widget: string, required: false }
       - { label: 受賞の対象(発表タイトルなど。受賞のときだけ), name: subject, widget: string, required: false }
+      - { label: 期間(助成金のとき。例 2025年6月〜2028年3月), name: period, widget: string, required: false }
       - { label: 受賞者(受賞のときだけ。省略すると著者の1人目), name: recipients, widget: list, required: false, field: { label: 受賞者, name: recipient, widget: string } }
 
   - name: members

@@ -21,10 +21,10 @@ const career: { date: string; text: string }[] = Array.isArray(d.career)
     });
 
 const typeGroups = [
-  { label: '論文・解説・書籍', types: ['論文', '総説・解説', '書籍'] },
+  { label: '論文・解説・書籍', types: ['論文', '総説・解説', '書籍', '特許'] },
   { label: '学会発表', types: ['招待講演', '国際学会', '国内学会'] },
   { label: '受賞', types: ['受賞'] },
-  { label: '特許', types: ['特許'] },
+  { label: '助成金', types: ['助成金'] },
 ];
 const split = (items: any[]) =>
   typeGroups
@@ -32,6 +32,8 @@ const split = (items: any[]) =>
     .filter((g) => g.items.length > 0);
 const groups = split(pubs);
 const marks = nameKeys(m);
+// 各項目は新しい順に最初の SHOW 件だけ見せ、残りは「さらに表示」で開く
+const SHOW = 5;
 const SHOW = 5; // 種類ごとに最初に見せる件数(新しい順)
 const dialogId = `member-${m.id}`;
 ---
