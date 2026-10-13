@@ -36,12 +36,23 @@ jobs:
         with:
           node-version: 22
 
+      - name: Prepare font (Monapo)
+        run: |
+          sudo apt-get -qq update && apt-get download fonts-monapo
+          dpkg-deb -x fonts-monapo_*.deb /tmp/monapo && rm fonts-monapo_*.deb
+          pip install --quiet fonttools brotli
+          find /tmp/monapo -name "*.ttf" | head -1 > /tmp/monapo-path
+          cat /tmp/monapo-path
       - name: Install
         run: npm install --no-audit --no-fund
 
       - name: Build
         run: npm run build
 
+      - name: Font subset
+        run: |
+          export MONAPO_LICENSE=$(find /tmp/monapo -iname "copyright" | head -1)
+          python3 scripts/subset-font.py "$(cat /tmp/monapo-path)" dist
       - name: Check output
         run: npm run check:dist
 

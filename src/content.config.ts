@@ -48,7 +48,10 @@ const members = defineCollection({
     theme: z.string().optional(), // 研究テーマ(文章)
     keywords: z.array(z.string()).optional(), // 研究キーワード(名前の下に表示)
     researchmap: z.string().url().optional(), // researchmap の URL
-    career: z.string().optional(), // 学歴・経歴・進路など(自由記述)
+    // 経歴(年表)。[{ date: 2022年4月, text: 京都工芸繊維大学 教授 }, ...] の形。文章1つでも可
+    career: z.union([z.string(), z.array(z.object({ date: z.coerce.string(), text: z.string() }))]).optional(),
+    website: z.string().url().optional(), // 個人のウェブサイト
+    societies: z.string().optional(), // 所属学会
     aliases: z.array(z.string()).optional(), // 業績の著者欄での別表記(例: ミクッチ ダニエレ)
     // 卒業・修了/退職した年(例: 2026 や 2026-03)。在籍中は書かない
     graduated: z.coerce.string().optional(),

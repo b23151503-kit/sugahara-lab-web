@@ -156,7 +156,7 @@ jobs:
           npm install --no-audit --no-fund
           npm run build 2>&1 | tail -40 | tee .ai/build.log
           test "${PIPESTATUS[0]}" = "0"
-          npm run check:dist
+          SKIP_FONT_CHECK=1 npm run check:dist
 
       - name: Write PR body
         id: body

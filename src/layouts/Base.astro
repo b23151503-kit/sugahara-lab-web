@@ -28,9 +28,11 @@ const previewLabel = process.env.PREVIEW_LABEL;
   <meta property="og:type" content="website" />
   <meta property="og:image" content={new URL(url('/images/hero/group.jpg'), Astro.site)} />
   <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+  <link rel="preload" href={url('/fonts/monapo.woff2')} as="font" type="font/woff2" crossorigin />
+  <style is:inline set:html={`@font-face{font-family:'Monapo';src:url('${url('/fonts/monapo.woff2')}') format('woff2');font-display:swap;}`}></style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <a class="skip" href="#main">本文へスキップ</a>

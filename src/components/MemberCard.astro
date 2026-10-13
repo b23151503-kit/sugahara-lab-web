@@ -11,7 +11,14 @@ const { m, pubs, sub, big = false } = Astro.props;
 const d = m.data;
 const isAlumni = d.status === '卒業・修了';
 const roleText = isAlumni ? alumniLabel(d.role) : d.role;
-const hasDetail = pubs.length > 0 || !!d.career || !!d.theme || !!d.researchmap;
+const hasDetail = pubs.length > 0 || !!d.theme || !!d.researchmap || !!d.website || !!d.societies;
+// 経歴(年表)。文字列で書かれていたら1行ずつ「年月 内容」に分ける
+const career: { date: string; text: string }[] = Array.isArray(d.career)
+  ? d.career
+  : (d.career ?? '').split('\n').filter(Boolean).map((l: string) => {
+      const m = l.match(/^([\d年月〜~\-.\s]+?)\s+(.*)$/);
+      return m ? { date: m[1], text: m[2] } : { date: '', text: l };
+    });
 
 const typeGroups = [
   { label: '論文・解説・書籍', types: ['論文', '総説・解説', '書籍'] },
@@ -48,6 +55,24 @@ const dialogId = `member-${m.id}`;
       {d.theme && <span class="theme">{d.theme}</span>}
     </div>
   )}
+  {(career.length > 0 || d.website) && (
+    <div class="card-extra">
+      {d.website && <a class="card-link" href={d.website} target="_blank" rel="noopener">Website <span aria-hidden="true">↗</span></a>}
+      {career.length > 0 && (
+        <details class="career">
+          <summary>経歴 <span class="plus" aria-hidden="true">＋</span></summary>
+          <ol class="timeline">
+            {career.map((c) => (
+              <li>
+                {c.date && <span class="t-date">{c.date}</span>}
+                <span class="t-text">{c.text}</span>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+    </div>
+  )}
   {hasDetail && (
     <dialog id={dialogId} class="member-dialog" aria-labelledby={`${dialogId}-title`}>
       <div class="md-head">
@@ -59,10 +84,11 @@ const dialogId = `member-${m.id}`;
         <button type="button" class="md-close" aria-label="閉じる">×</button>
       </div>
       <div class="md-body">
-        {(d.theme || d.career || d.researchmap) && (
+        {(d.theme || d.researchmap || d.website || d.societies) && (
           <dl class="info">
             {d.theme && <><dt>研究テーマ</dt><dd>{d.theme}</dd></>}
-            {d.career && <><dt>経歴</dt><dd style="white-space:pre-line">{d.career}</dd></>}
+            {d.societies && <><dt>所属学会</dt><dd>{d.societies}</dd></>}
+            {d.website && <><dt>Website</dt><dd><a class="ext-link" href={d.website} target="_blank" rel="noopener">{d.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}</a></dd></>}
             {d.researchmap && <><dt>researchmap</dt><dd><a class="ext-link" href={d.researchmap} target="_blank" rel="noopener">{d.researchmap.replace(/^https?:\/\//, '')}</a></dd></>}
           </dl>
         )}

@@ -8,10 +8,9 @@
   --dark: #0b0d0f;
   --gold: #e2a72e;
   --gold-text: #7f5a0c; /* 明るい背景の上で読める金色 */
-  /* 日本語はヒラギノ角ゴ(Mac・iPhone に標準搭載)。入っていない Windows・Android では Noto Sans JP で表示 */
-  --hiragino: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴシック', 'ヒラギノ角ゴ ProN W3', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif;
-  --sans: 'Instrument Sans', var(--hiragino);
-  --ja: var(--hiragino);
+  /* 日本語はモナポ(Monapo。IPAフォント派生・IPAフォントライセンス)。フォントは配信時に使う文字だけに絞って /fonts/monapo.woff2 に置く */
+  --sans: 'Instrument Sans', 'Monapo', sans-serif;
+  --ja: 'Monapo', sans-serif;
   --gutter: clamp(20px, 4vw, 56px);
   --max: 1320px;
 }
@@ -180,7 +179,7 @@ main { display: block; }
 .members-photo { margin: 0 0 40px; }
 .members-photo img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 .member-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
-.member-card { display: flex; }
+.member-card { display: flex; flex-direction: column; }
 .member-open { all: unset; box-sizing: border-box; flex: 1; display: flex; flex-direction: column; gap: 2px; min-height: 44px; padding: 16px 18px 14px; background: var(--paper); border: 1px solid var(--line); cursor: pointer; font-family: var(--ja); color: var(--ink); line-height: 1.6; }
 .member-open:hover { border-color: var(--ink); }
 .member-open:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
@@ -266,3 +265,22 @@ main { display: block; }
 .pub-subject { margin-top: 2px; color: var(--ink-2); }
 .member-open .badge { align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 1px 8px; border: 1px solid var(--gold-text); color: var(--gold-text); }
 .member-open .theme { font-size: 12px; line-height: 1.7; color: var(--ink-2); margin-top: 6px; }
+
+/* カード下の「経歴 ＋」(開閉)と Website リンク */
+.card-extra { display: flex; flex-direction: column; border: 1px solid var(--line); border-top: 0; background: var(--paper); }
+.card-link { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 0 18px; font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--gold-text); }
+.member-card.big .card-link { padding: 0 28px; }
+.career { border-top: 1px solid var(--line); }
+.career summary { list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 18px; cursor: pointer; font-size: 14px; font-weight: 700; background: #f1f0ec; }
+.member-card.big .career summary { padding: 0 28px; }
+.career summary::-webkit-details-marker { display: none; }
+.career summary .plus { font-family: var(--sans); color: var(--muted); transition: transform .2s; }
+.career[open] summary .plus { transform: rotate(45deg); }
+.timeline { list-style: none; margin: 0; padding: 20px 18px 8px 18px; }
+.member-card.big .timeline { padding: 24px 28px 12px; }
+.timeline li { position: relative; padding: 0 0 22px 30px; }
+.timeline li::before { content: ''; position: absolute; left: 4px; top: 9px; bottom: -9px; width: 2px; background: #d6d6d0; }
+.timeline li:last-child::before { display: none; }
+.timeline li::after { content: ''; position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border: 2px solid var(--gold); border-radius: 50%; background: var(--paper); }
+.timeline .t-date { display: block; font-size: 13px; color: var(--muted); }
+.timeline .t-text { display: block; margin-top: 4px; font-size: 15px; line-height: 1.7; }

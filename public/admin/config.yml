@@ -86,7 +86,16 @@ collections:
       - { label: 補足(学位、社会人DC など), name: note, widget: string, required: false }
       - { label: 研究テーマ(一文。名前の下に表示), name: theme, widget: string, required: false }
       - { label: researchmap の URL, name: researchmap, widget: string, required: false }
-      - { label: 学歴・経歴・進路など, name: career, widget: text, required: false }
+      - label: 経歴(年表)
+        name: career
+        widget: list
+        required: false
+        summary: "{{fields.date}} {{fields.text}}"
+        fields:
+          - { label: 年月(例 2022年4月), name: date, widget: string }
+          - { label: 内容, name: text, widget: string }
+      - { label: ウェブサイト, name: website, widget: string, required: false }
+      - { label: 所属学会, name: societies, widget: string, required: false }
       - { label: 業績の著者欄での別表記(自動で一致しないときだけ), name: aliases, widget: list, required: false, field: { label: 表記, name: alias, widget: string } }
       - { label: 卒業・修了・退職した年(例 2026), name: graduated, widget: string, required: false }
 
