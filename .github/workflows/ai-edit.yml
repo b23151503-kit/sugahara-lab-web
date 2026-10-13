@@ -99,6 +99,7 @@ jobs:
           exit 1
 
       - name: Ask Gemini
+        id: gemini
         if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'gemini'
         uses: google-github-actions/run-gemini-cli@v0
         env:
@@ -125,6 +126,14 @@ jobs:
             書かれていない事実を推測で補わないでください。
             最後に、作成・変更したファイルと「要確認」の点を日本語の箇条書きで .ai/report.md に書いてください。
             git の commit や push はしないでください。
+
+      - name: Show Gemini error
+        if: failure() && steps.gemini.outcome == 'failure'
+        env:
+          GEMINI_ERR: ${{ steps.gemini.outputs.error }}
+        run: |
+          # 失敗の理由を画面上部(Annotations)に出す
+          printf '%s\n' "$GEMINI_ERR" | grep -v '^\s*$' | head -15 | while IFS= read -r l; do echo "::error title=Gemini::${l:0:900}"; done
 
       - name: Ask Claude
         if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'claude'
