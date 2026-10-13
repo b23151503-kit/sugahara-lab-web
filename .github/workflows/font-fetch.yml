@@ -1,0 +1,34 @@
+# IPAモナーフォントを取得して font-src ブランチに置く(フォント導入作業用・手動実行)
+name: Fetch IPA Mona font
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Look for the font
+        run: |
+          mkdir -p out && cd out
+          sudo apt-get -qq update
+          apt-cache search mona | tee apt-mona.txt
+          apt-cache search ipafont | tee apt-ipa.txt
+          for pkg in fonts-ipafont-mona fonts-ipamonafont ttf-ipamonafont fonts-mona; do
+            if apt-get download "$pkg" 2>/dev/null; then echo "got $pkg"; fi
+          done
+          for f in *.deb; do [ -f "$f" ] && dpkg-deb -x "$f" "x-${f%.deb}"; done
+          find . -iname "*.ttf" -o -iname "*.otf" -o -iname "*.ttc" | tee fonts.txt
+          find . -iname "*license*" -o -iname "copyright" | tee licenses.txt
+          rm -f *.deb
+      - name: Save to font-src branch
+        run: |
+          cd out
+          git init -q -b font-src
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "font probe"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" font-src
