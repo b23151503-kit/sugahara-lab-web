@@ -32,8 +32,6 @@ const split = (items: any[]) =>
     .filter((g) => g.items.length > 0);
 const groups = split(pubs);
 const marks = nameKeys(m);
-// 各項目は新しい順に最初の SHOW 件だけ見せ、残りは「さらに表示」で開く
-const SHOW = 5;
 const SHOW = 5; // 種類ごとに最初に見せる件数(新しい順)
 const dialogId = `member-${m.id}`;
 ---
