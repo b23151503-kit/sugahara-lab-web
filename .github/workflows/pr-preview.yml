@@ -41,7 +41,10 @@ jobs:
           fetch-depth: 0
 
       - name: Download pasted images into public/uploads
-        run: python3 scripts/localize-images.py
+        # 変更案のブランチが古くてもいいように、スクリプトは main のものを使う
+        run: |
+          git show origin/main:scripts/localize-images.py > "$RUNNER_TEMP/localize-images.py"
+          python3 "$RUNNER_TEMP/localize-images.py" --root "$PWD"
 
       - name: Remove unrelated files
         run: |

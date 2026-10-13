@@ -15,7 +15,7 @@ import tempfile
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(sys.argv[sys.argv.index('--root') + 1]) if '--root' in sys.argv else Path(__file__).resolve().parent.parent
 CONTENT = ROOT / 'src' / 'content'
 UPLOADS = ROOT / 'public' / 'uploads'
 PATTERN = re.compile(
