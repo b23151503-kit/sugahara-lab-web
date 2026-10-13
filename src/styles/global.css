@@ -8,8 +8,10 @@
   --dark: #0b0d0f;
   --gold: #e2a72e;
   --gold-text: #7f5a0c; /* 明るい背景の上で読める金色 */
-  --sans: 'Instrument Sans', 'Zen Kaku Gothic New', system-ui, sans-serif;
-  --ja: 'Zen Kaku Gothic New', 'Instrument Sans', system-ui, sans-serif;
+  /* 日本語はヒラギノ角ゴ(Mac・iPhone に標準搭載)。入っていない Windows・Android では Noto Sans JP で表示 */
+  --hiragino: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴシック', 'ヒラギノ角ゴ ProN W3', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', sans-serif;
+  --sans: 'Instrument Sans', var(--hiragino);
+  --ja: var(--hiragino);
   --gutter: clamp(20px, 4vw, 56px);
   --max: 1320px;
 }
