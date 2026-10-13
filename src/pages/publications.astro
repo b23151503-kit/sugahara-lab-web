@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import PubItem from '../components/PubItem.astro';
-import { authorsToMembers, nameKeys, norm, sortPubs } from '../lib/people';
+import { pubMembers, nameKeys, norm, sortPubs } from '../lib/people';
 
 const pubs = sortPubs(await getCollection('publications'));
 const members = await getCollection('members');
@@ -21,7 +21,7 @@ const types = ['論文', '総説・解説', '国際学会', '国内学会', '招
 );
 
 // 業績ごとに、著者に含まれるメンバー
-const who = new Map(pubs.map((p) => [p.id, authorsToMembers(p.data.authors, members)]));
+const who = new Map(pubs.map((p) => [p.id, pubMembers(p, members)]));
 // 著者ごとのメンバー id(選んだ人の名前に蛍光ペンを引くため)
 const keyToMember = new Map<string, string>();
 for (const m of members) for (const k of nameKeys(m)) keyToMember.set(k, m.id);

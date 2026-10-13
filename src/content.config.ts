@@ -30,6 +30,7 @@ const publications = defineCollection({
     url: z.string().url().optional(),
     note: z.string().optional(),
     subject: z.string().optional(), // 受賞の対象(発表タイトル・論文など)
+    recipients: z.array(z.string()).optional(), // 受賞者(省略時は著者欄の1人目)
   }),
 });
 

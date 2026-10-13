@@ -46,11 +46,24 @@ export function isFirstAuthor(pub: any, member: any): boolean {
   return !!a && nameKeys(member).includes(norm(a));
 }
 
+/**
+ * その業績を「誰の実績」として数えるか。
+ * 受賞は受賞者本人だけ(recipients があればその人、なければ著者欄の1人目=発表者)。
+ * それ以外は著者全員。
+ */
+export function pubMembers(p: any, members: any[]): string[] {
+  if (p.data.type === '受賞') {
+    const who = p.data.recipients?.length ? p.data.recipients : p.data.authors.slice(0, 1);
+    return authorsToMembers(who, members);
+  }
+  return authorsToMembers(p.data.authors, members);
+}
+
 /** メンバー id → その人の業績一覧 */
 export function pubsByMember(pubs: any[], members: any[]): Map<string, any[]> {
   const map = new Map<string, any[]>(members.map((m) => [m.id, []]));
   for (const p of pubs) {
-    for (const id of authorsToMembers(p.data.authors, members)) map.get(id)!.push(p);
+    for (const id of pubMembers(p, members)) map.get(id)!.push(p);
   }
   return map;
 }
