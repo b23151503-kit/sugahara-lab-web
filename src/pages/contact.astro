@@ -12,8 +12,21 @@ import { SITE } from '../lib/site';
         <dt>所属</dt><dd>京都工芸繊維大学 材料化学系<br />集積材料・異相界面科学研究分野</dd>
         <dt>住所</dt><dd>{SITE.address}</dd>
         <dt>電話</dt><dd><a href={`tel:${SITE.tel.replace(/-/g, '')}`}>{SITE.tel}</a></dd>
-        <dt>メール</dt><dd>{SITE.mailUser}[at]{SITE.mailDomain}<br /><small style="color:var(--muted)">[at] を @ に置き換えてください</small></dd>
+        <dt>メール</dt><dd><span id="mail" data-u={SITE.mailUser.split('').reverse().join('')} data-d={SITE.mailDomain.split('').reverse().join('')}>{SITE.mailUser}[at]{SITE.mailDomain}</span></dd>
       </dl>
     </div>
   </section>
+  <script is:inline>
+    // 迷惑メール対策: アドレスは HTML に @ 付きで書かず、表示するときに組み立てる
+    (() => {
+      const el = document.getElementById('mail');
+      if (!el) return;
+      const r = (s) => s.split('').reverse().join('');
+      const addr = r(el.dataset.u) + '@' + r(el.dataset.d);
+      const a = document.createElement('a');
+      a.href = 'mailto:' + addr;
+      a.textContent = addr;
+      el.replaceChildren(a);
+    })();
+  </script>
 </Base>

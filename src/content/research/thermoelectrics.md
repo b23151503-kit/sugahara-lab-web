@@ -3,7 +3,7 @@ title: Thermoelectrics
 title_ja: 熱電変換技術
 order: 30
 summary: 環境中の廃熱を電気に変える熱電変換で、IoTセンサのための自律分散型電源の実現を目指します。
-image: /images/research/thermo-module-flexible.jpg
+image: /images/research/thumb-thermoelectrics.jpg
 ---
 
 ## IoTのための自律電源

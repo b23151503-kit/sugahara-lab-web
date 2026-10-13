@@ -13,7 +13,7 @@ const { Content } = await render(page);
   <section class="section">
     <div class="wrap split">
       <div class="prose"><Content /></div>
-      {page.data.image && <img src={url(page.data.image)} alt="研究室メンバーの集合写真" loading="lazy" />}
+      {page.data.image && <img class="about-photo" src={url(page.data.image)} alt="研究室メンバーの集合写真" width="1600" height="1067" />}
     </div>
   </section>
 </Base>

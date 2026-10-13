@@ -150,7 +150,8 @@ main { display: block; }
 .card { display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); }
 .card:hover { text-decoration: none; border-color: var(--ink); }
 .card .img { aspect-ratio: 16 / 10; background: #e9e7e0; overflow: hidden; }
-.card .img img { width: 100%; height: 100%; object-fit: cover; }
+.card .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about-photo { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border: 1px solid var(--line); }
 .card .body { padding: 22px 24px 26px; display: flex; flex-direction: column; gap: 6px; }
 .card .en { font-family: var(--sans); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
 .card .ja { font-size: 13px; font-weight: 700; color: var(--gold-text); }

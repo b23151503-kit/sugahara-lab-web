@@ -3,7 +3,7 @@ title: Ceramics Coating
 title_ja: セラミックスコーティング
 order: 10
 summary: 金属酸化物セラミックスの薄膜を印刷法で基板上に形成し、ガスセンサやTFT、太陽電池などのデバイスに応用します。
-image: /images/research/ceramics-pi-film.jpg
+image: /images/research/thumb-ceramics.jpg
 ---
 
 ## 印刷法による酸化物薄膜

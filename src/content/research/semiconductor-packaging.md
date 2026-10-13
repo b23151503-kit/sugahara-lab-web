@@ -3,7 +3,7 @@ title: Semiconductor Packaging
 title_ja: 半導体実装技術
 order: 20
 summary: 半導体と金属電極・基板の接合界面での元素拡散を抑え、電子デバイスの信頼性と寿命を高める積層構造を研究します。
-image: /images/research/packaging-bite-interface.jpg
+image: /images/research/thumb-packaging.jpg
 ---
 
 ## 接合界面の安定性
