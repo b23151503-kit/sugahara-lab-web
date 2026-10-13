@@ -132,8 +132,11 @@ jobs:
         env:
           GEMINI_ERR: ${{ steps.gemini.outputs.error }}
         run: |
-          # 失敗の理由を画面上部(Annotations)に出す
-          printf '%s\n' "$GEMINI_ERR" | grep -v '^\s*$' | head -15 | while IFS= read -r l; do echo "::error title=Gemini::${l:0:900}"; done
+          # 失敗の理由を画面上部(Annotations)に出す(注釈は1ステップ10件までなので、まとめて1件に)
+          msg=$(printf '%s\n' "$GEMINI_ERR" | grep -v '^\s*at ' | grep -v '^\s*$' | grep -iE 'error|fail|quota|429|403|404|status|model|key|rate|exceed|cause' | sort -u | head -25 | cut -c1-300)
+          [ -z "$msg" ] && msg=$(printf '%s\n' "$GEMINI_ERR" | tail -25)
+          msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
+          echo "::error title=Gemini の失敗理由::$msg"
 
       - name: Ask Claude
         if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'claude'
