@@ -284,3 +284,7 @@ main { display: block; }
 .timeline li::after { content: ''; position: absolute; left: 0; top: 4px; width: 10px; height: 10px; border: 2px solid var(--gold); border-radius: 50%; background: var(--paper); }
 .timeline .t-date { display: block; font-size: 13px; color: var(--muted); }
 .timeline .t-text { display: block; margin-top: 4px; font-size: 15px; line-height: 1.7; }
+
+/* ポップアップ: 6件目以降を開くボタン */
+.show-more { display: block; width: 100%; min-height: 44px; margin-top: 8px; font: inherit; font-size: 13px; font-weight: 700; color: var(--ink); background: transparent; border: 1px dashed #b9bcb5; cursor: pointer; }
+.show-more:hover { border-style: solid; border-color: var(--ink); }

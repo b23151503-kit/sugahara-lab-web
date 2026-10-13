@@ -32,6 +32,7 @@ const split = (items: any[]) =>
     .filter((g) => g.items.length > 0);
 const groups = split(pubs);
 const marks = nameKeys(m);
+const SHOW = 5; // 種類ごとに最初に見せる件数(新しい順)
 const dialogId = `member-${m.id}`;
 ---
 <li class:list={['member-card', { big, 'no-detail': !hasDetail }]}>
@@ -96,8 +97,17 @@ const dialogId = `member-${m.id}`;
           <section class="md-sec">
             <h3>{g.label}</h3>
             <ul class="pub-list">
-              {g.items.map((p) => <li><PubItem pub={p} showType={g.types.length > 1} highlight={marks} /></li>)}
+              {g.items.map((p, i) => (
+                <li class:list={{ 'is-more': i >= SHOW }} hidden={i >= SHOW}>
+                  <PubItem pub={p} showType={g.types.length > 1} highlight={marks} />
+                </li>
+              ))}
             </ul>
+            {g.items.length > SHOW && (
+              <button type="button" class="show-more" aria-expanded="false" data-more={`それ以前の${g.label}を表示(${g.items.length - SHOW}件)`} data-less="最新5件だけ表示">
+                それ以前の{g.label}を表示({g.items.length - SHOW}件)
+              </button>
+            )}
           </section>
         ))}
         {pubs.length > 0 && (
