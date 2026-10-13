@@ -19,7 +19,7 @@ const news = defineCollection({
 const publications = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/publications' }),
   schema: z.object({
-    type: z.enum(['論文', '総説・解説', '書籍', '国際学会', '国内学会', '招待講演', '受賞', '助成金', '特許']),
+    type: z.enum(['論文', '総説・解説', '書籍', '国際学会', '国内学会', '招待講演', '受賞', 'その他', '特許']),
     authors: z.array(z.string()).min(1),
     title: z.string(),
     venue: z.string(),
@@ -30,7 +30,7 @@ const publications = defineCollection({
     url: z.string().url().optional(),
     note: z.string().optional(),
     subject: z.string().optional(), // 受賞の対象(発表タイトル・論文など)
-    period: z.string().optional(), // 助成金などの期間(例: 2025年6月〜2028年3月)
+    period: z.string().optional(), // 助成・共同研究などの期間(例: 2025年6月〜2028年3月)
     recipients: z.array(z.string()).optional(), // 受賞者(省略時は著者欄の1人目)
   }),
 });
