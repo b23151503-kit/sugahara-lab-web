@@ -138,6 +138,24 @@ jobs:
           [ -z "$msg" ] && msg=$(printf '%s\n' "$GEMINI_ERR" | tail -25)
           msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
           echo "::error title=Gemini の失敗理由::$msg"
+          # 何が起きたか分かるように、Issue に知らせる
+          if printf '%s' "$GEMINI_ERR" | grep -q '429'; then
+            why="Gemini の無料枠の回数を使い切りました(日本時間の夕方ごろにリセット)。時間をおいて Actions → AI editing → Run workflow でやり直すか、Copilot に頼んでください。"
+          elif printf '%s' "$GEMINI_ERR" | grep -q '503'; then
+            why="Gemini が混雑していて応答しませんでした(Google 側の一時的な混雑)。時間をおいて Actions → AI editing → Run workflow でやり直すか、Copilot に頼んでください。"
+          else
+            why="Gemini でエラーが起きました。"
+          fi
+          body="AI(Gemini)による処理に失敗したため、変更案は作られていません。
+
+理由: $why
+
+実行ログ: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ -n "${{ github.event.issue.number }}" ]; then
+            gh issue comment ${{ github.event.issue.number }} --body "$body" || true
+          else
+            gh issue create --title "AI による inbox の処理に失敗しました" --body "$body" || true
+          fi
 
       - name: Ask Claude
         if: steps.req.outputs.skip != 'true' && steps.req.outputs.provider == 'claude'
