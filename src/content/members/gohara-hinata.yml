@@ -3,7 +3,4 @@ name_en: Hinata Gohara
 role: 修士課程
 status: 在籍
 order: 90
-keywords:
-- 熱電半導体/金属界面
-- 接触抵抗
-- 銀焼結接合
+theme: 熱電半導体と金属の接合界面における接触抵抗と信頼性の評価。

@@ -1,8 +1,9 @@
 ---
 import { norm } from '../lib/people';
-interface Props { pub: any; showType?: boolean; highlight?: string[] }
+interface Props { pub: any; showType?: boolean; highlight?: string[]; ids?: string[] }
 // highlight: 太字にしたい著者名の表記(nameKeys の値)
-const { pub, showType = true, highlight = [] } = Astro.props;
+// ids: 著者ごとのメンバー id(業績ページで、選んだ人の名前に蛍光ペンを引くため)
+const { pub, showType = true, highlight = [], ids = [] } = Astro.props;
 const d = pub.data;
 const link = d.doi ? `https://doi.org/${d.doi}` : d.url;
 const when = d.date ?? String(d.year);
@@ -15,6 +16,7 @@ const marks = new Set(highlight);
 </div>
 <div class="pub-meta">
   {d.authors.map((a: string, i: number) => (
-    <>{i > 0 && ', '}{marks.has(norm(a)) ? <b>{a}</b> : a}</>
+    <>{i > 0 && ', '}<span class:list={['au', { me: marks.has(norm(a)) }]} data-m={ids[i] || undefined}>{a}</span></>
   ))} — <span class="venue">{d.venue}</span>{d.volume_pages && <>, {d.volume_pages}</>} ({when.replace(/-/g, '.')})
+  {d.subject && <div class="pub-subject">対象: {d.subject}</div>}
 </div>

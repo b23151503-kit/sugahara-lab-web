@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import PubItem from '../components/PubItem.astro';
-import { authorsToMembers, firstAuthorMember, sortPubs } from '../lib/people';
+import { authorsToMembers, nameKeys, norm, sortPubs } from '../lib/people';
 
 const pubs = sortPubs(await getCollection('publications'));
 const members = await getCollection('members');
@@ -22,7 +22,10 @@ const types = ['論文', '総説・解説', '国際学会', '国内学会', '招
 
 // 業績ごとに、著者に含まれるメンバー
 const who = new Map(pubs.map((p) => [p.id, authorsToMembers(p.data.authors, members)]));
-const firstOf = new Map(pubs.map((p) => [p.id, firstAuthorMember(p.data.authors, members) ?? '']));
+// 著者ごとのメンバー id(選んだ人の名前に蛍光ペンを引くため)
+const keyToMember = new Map<string, string>();
+for (const m of members) for (const k of nameKeys(m)) keyToMember.set(k, m.id);
+const authorIds = (p: any) => p.data.authors.map((a: string) => keyToMember.get(norm(a)) ?? '');
 const counts = new Map<string, number>();
 for (const ids of who.values()) for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
 const order = (m: any) => (m.data.status === '在籍' ? 0 : 1) * 10000 + m.data.order;
@@ -31,7 +34,7 @@ const searchText = (p: any) =>
   [p.data.title, p.data.venue, p.data.authors.join(' '), p.data.note ?? '', p.data.type].join(' ').toLowerCase();
 ---
 <Base title="業績" current="/publications/">
-  <PageHead kicker="Publications" title="業績" lead="論文・学会発表・受賞などを年度別に掲載しています。メンバーの名前(筆頭著者・共著の区別も)や言葉で検索できます。" />
+  <PageHead kicker="Publications" title="業績" lead="論文・学会発表・受賞などを年度別に掲載しています。メンバーの名前や言葉で検索できます。" />
   <section class="section">
     <div class="wrap">
       <div class="pub-search">
@@ -44,13 +47,6 @@ const searchText = (p: any) =>
             <optgroup label="卒業生・元スタッフ">
               {people.filter((m) => m.data.status !== '在籍').map((m) => <option value={m.id}>{m.data.name}</option>)}
             </optgroup>
-          </select>
-        </label>
-        <label>著者の立場
-          <select id="f-role" disabled>
-            <option value="">筆頭・共著すべて</option>
-            <option value="first">筆頭著者のみ</option>
-            <option value="co">共著のみ</option>
           </select>
         </label>
         <label>キーワード
@@ -68,8 +64,8 @@ const searchText = (p: any) =>
           <h2 class="year-head">{y}年度</h2>
           <ul class="pub-list">
             {pubs.filter((p) => fy(p) === y).map((p) => (
-              <li data-type={p.data.type} data-members={(who.get(p.id) ?? []).join(' ')} data-first={firstOf.get(p.id)} data-text={searchText(p)}>
-                <PubItem pub={p} />
+              <li data-type={p.data.type} data-members={(who.get(p.id) ?? []).join(' ')} data-text={searchText(p)}>
+                <PubItem pub={p} ids={authorIds(p)} />
               </li>
             ))}
           </ul>
@@ -81,7 +77,6 @@ const searchText = (p: any) =>
   <script is:inline>
     (() => {
       const member = document.getElementById('f-member');
-      const role = document.getElementById('f-role');
       const text = document.getElementById('f-text');
       const btns = document.querySelectorAll('.filters button');
       const items = [...document.querySelectorAll('.pub-list li')];
@@ -89,15 +84,12 @@ const searchText = (p: any) =>
       let type = '';
       const apply = () => {
         const m = member.value;
-        role.disabled = !m;
-        const r = m ? role.value : '';
         const words = text.value.toLowerCase().split(/\s+/).filter(Boolean);
         let n = 0;
         items.forEach((li) => {
           const ok =
             (!type || li.dataset.type === type) &&
             (!m || li.dataset.members.split(' ').includes(m)) &&
-            (!r || (r === 'first' ? li.dataset.first === m : li.dataset.first !== m)) &&
             words.every((w) => li.dataset.text.includes(w));
           li.hidden = !ok;
           if (ok) n++;
@@ -108,7 +100,8 @@ const searchText = (p: any) =>
         document.getElementById('f-empty').hidden = n > 0;
         const q = new URLSearchParams(location.search);
         m ? q.set('member', m) : q.delete('member');
-        r ? q.set('role', r) : q.delete('role');
+        // 選んだメンバーの名前に蛍光ペン
+        document.querySelectorAll('.pub-list .au').forEach((el) => el.classList.toggle('hl', !!m && el.dataset.m === m));
         history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
       };
       btns.forEach((b) =>
@@ -119,16 +112,10 @@ const searchText = (p: any) =>
         }),
       );
       member.addEventListener('change', apply);
-      role.addEventListener('change', apply);
       text.addEventListener('input', apply);
       // メンバーページからのリンク(?member=...)に対応
       const init = new URLSearchParams(location.search).get('member');
-      const initRole = new URLSearchParams(location.search).get('role');
-      if (init && [...member.options].some((o) => o.value === init)) {
-        member.value = init;
-        if (initRole === 'first' || initRole === 'co') role.value = initRole;
-        apply();
-      }
+      if (init && [...member.options].some((o) => o.value === init)) { member.value = init; apply(); }
     })();
   </script>
 </Base>

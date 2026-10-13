@@ -60,6 +60,7 @@ collections:
       - { label: DOI(10.xxxx/... の部分のみ), name: doi, widget: string, required: false }
       - { label: URL, name: url, widget: string, required: false }
       - { label: 備考(口頭発表・受賞記念講演など), name: note, widget: string, required: false }
+      - { label: 受賞の対象(発表タイトルなど。受賞のときだけ), name: subject, widget: string, required: false }
 
   - name: members
     label: メンバー
@@ -82,8 +83,7 @@ collections:
       - { label: 並び順(小さいほど上), name: order, widget: number, value_type: int, default: 100 }
       - { label: 写真, name: photo, widget: image, required: false }
       - { label: 補足(学位、社会人DC など), name: note, widget: string, required: false }
-      - { label: 研究キーワード(名前の下に表示), name: keywords, widget: list, required: false, field: { label: キーワード, name: keyword, widget: string } }
-      - { label: 研究テーマ(文章), name: theme, widget: string, required: false }
+      - { label: 研究テーマ(一文。名前の下に表示), name: theme, widget: string, required: false }
       - { label: researchmap の URL, name: researchmap, widget: string, required: false }
       - { label: 学歴・経歴・進路など, name: career, widget: text, required: false }
       - { label: 業績の著者欄での別表記(自動で一致しないときだけ), name: aliases, widget: list, required: false, field: { label: 表記, name: alias, widget: string } }

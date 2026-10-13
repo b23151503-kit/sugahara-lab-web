@@ -213,12 +213,12 @@ main { display: block; }
 .md-block { margin-top: 28px; }
 .md-block-title { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 8px 12px; background: var(--ink); color: #fff; font-size: 15px; }
 .md-block-title .en { font-family: var(--sans); font-size: 12px; font-weight: 500; color: #c9cdd1; }
-.md-sec h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 15px; }
-.md-sec h4 span { font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 600; }
+.md-sec h3, .md-sec h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 15px; }
+.md-sec h3 span, .md-sec h4 span { font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 600; }
 .md-sec .pub-list li { padding: 12px 0; }
 .md-sec .pub-title { font-size: 14px; }
 .md-sec .pub-meta { font-size: 12px; }
-.md-sec .pub-meta b { color: var(--ink); background: rgba(226,167,46,.25); font-weight: 700; }
+.md-sec .pub-meta .au.me { color: var(--ink); font-weight: 700; }
 .md-empty { color: var(--muted); margin: 20px 0; }
 @media (max-width: 640px) {
   .md-head, .md-body { padding-left: 18px; padding-right: 18px; }
@@ -258,3 +258,9 @@ main { display: block; }
 .site-footer nav { display: flex; flex-wrap: wrap; gap: 0 24px; font-family: var(--sans); }
 .site-footer nav a { padding: 10px 0; }
 .site-footer .copy { width: 100%; border-top: 1px solid rgba(255,255,255,.18); padding-top: 20px; font-size: 12px; color: #a7adb3; }
+
+/* 業績ページ: 選んだメンバーの名前に蛍光ペン */
+.au.hl { font-weight: 700; color: var(--ink); background: linear-gradient(transparent 50%, rgba(255, 214, 64, .75) 50%); padding: 0 1px; }
+.pub-subject { margin-top: 2px; color: var(--ink-2); }
+.member-open .badge { align-self: flex-start; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 1px 8px; border: 1px solid var(--gold-text); color: var(--gold-text); }
+.member-open .theme { font-size: 12px; line-height: 1.7; color: var(--ink-2); margin-top: 6px; }

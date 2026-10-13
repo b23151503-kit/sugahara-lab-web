@@ -29,6 +29,7 @@ const publications = defineCollection({
     doi: z.string().optional(),
     url: z.string().url().optional(),
     note: z.string().optional(),
+    subject: z.string().optional(), // 受賞の対象(発表タイトル・論文など)
   }),
 });
 

@@ -4,14 +4,13 @@
 // 何もない人は押せないカードとして表示する。
 import PubItem from './PubItem.astro';
 import { url } from '../lib/site';
-import { alumniLabel, isFirstAuthor, nameKeys } from '../lib/people';
+import { alumniLabel, nameKeys } from '../lib/people';
 
 interface Props { m: any; pubs: any[]; sub?: string; big?: boolean }
 const { m, pubs, sub, big = false } = Astro.props;
 const d = m.data;
 const isAlumni = d.status === '卒業・修了';
 const roleText = isAlumni ? alumniLabel(d.role) : d.role;
-const keywords: string[] = d.keywords ?? [];
 const hasDetail = pubs.length > 0 || !!d.career || !!d.theme || !!d.researchmap;
 
 const typeGroups = [
@@ -24,13 +23,7 @@ const split = (items: any[]) =>
   typeGroups
     .map((g) => ({ ...g, items: items.filter((p) => g.types.includes(p.data.type)) }))
     .filter((g) => g.items.length > 0);
-// 筆頭著者(著者欄の1人目)と共著に分ける。受賞・特許は別にまとめる
-const authored = pubs.filter((p) => !['受賞', '特許'].includes(p.data.type));
-const blocks = [
-  { label: '筆頭著者', en: 'First author', groups: split(authored.filter((p) => isFirstAuthor(p, m))) },
-  { label: '共著', en: 'Co-author', groups: split(authored.filter((p) => !isFirstAuthor(p, m))) },
-  { label: '受賞・特許', en: 'Awards & Patents', groups: split(pubs.filter((p) => ['受賞', '特許'].includes(p.data.type))) },
-].filter((b) => b.groups.length > 0);
+const groups = split(pubs);
 const marks = nameKeys(m);
 const dialogId = `member-${m.id}`;
 ---
@@ -41,7 +34,8 @@ const dialogId = `member-${m.id}`;
       <span class="n">{d.name}</span>
       <span class="e">{d.name_en}</span>
       {sub && <span class="note">{sub}</span>}
-      {keywords.length > 0 && <span class="kw">{keywords.map((k) => <span>{k}</span>)}</span>}
+      {!big && !isAlumni && d.note && <span class="badge">{d.note}</span>}
+      {d.theme && <span class="theme">{d.theme}</span>}
       <span class="count">詳細 <span aria-hidden="true">＋</span></span>
     </button>
   ) : (
@@ -50,7 +44,8 @@ const dialogId = `member-${m.id}`;
       <span class="n">{d.name}</span>
       <span class="e">{d.name_en}</span>
       {sub && <span class="note">{sub}</span>}
-      {keywords.length > 0 && <span class="kw">{keywords.map((k) => <span>{k}</span>)}</span>}
+      {!big && !isAlumni && d.note && <span class="badge">{d.note}</span>}
+      {d.theme && <span class="theme">{d.theme}</span>}
     </div>
   )}
   {hasDetail && (
@@ -60,7 +55,6 @@ const dialogId = `member-${m.id}`;
           <div class="md-role">{roleText}{d.graduated && isAlumni && ` · ${d.graduated}年`}{d.note && ` · ${d.note}`}</div>
           <h2 id={`${dialogId}-title`}>{d.name}</h2>
           <div class="md-en">{d.name_en}</div>
-          {keywords.length > 0 && <div class="kw kw-dark">{keywords.map((k) => <span>{k}</span>)}</div>}
         </div>
         <button type="button" class="md-close" aria-label="閉じる">×</button>
       </div>
@@ -72,17 +66,12 @@ const dialogId = `member-${m.id}`;
             {d.researchmap && <><dt>researchmap</dt><dd><a class="ext-link" href={d.researchmap} target="_blank" rel="noopener">{d.researchmap.replace(/^https?:\/\//, '')}</a></dd></>}
           </dl>
         )}
-        {blocks.map((blk) => (
-          <section class="md-block">
-            <h3 class="md-block-title">{blk.label} <span class="en">{blk.en}</span></h3>
-            {blk.groups.map((g) => (
-              <div class="md-sec">
-                <h4>{g.label}</h4>
-                <ul class="pub-list">
-                  {g.items.map((p) => <li><PubItem pub={p} showType={g.types.length > 1} highlight={marks} /></li>)}
-                </ul>
-              </div>
-            ))}
+        {groups.map((g) => (
+          <section class="md-sec">
+            <h3>{g.label}</h3>
+            <ul class="pub-list">
+              {g.items.map((p) => <li><PubItem pub={p} showType={g.types.length > 1} highlight={marks} /></li>)}
+            </ul>
           </section>
         ))}
         {pubs.length > 0 && (
