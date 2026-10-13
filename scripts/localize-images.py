@@ -26,23 +26,32 @@ PATTERN = re.compile(
 EXT = {'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp'}
 
 
-def download(url: str) -> tuple[bytes, str] | None:
-    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+def fetch(url: str, token: str | None) -> tuple[str, str, bytes]:
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         out = tmp.name
-    cmd = ['curl', '-sSL', '--retry', '2', '-o', out, '-w', '%{http_code} %{content_type}']
-    if token and url.startswith('https://github.com/'):
-        cmd += ['-H', f'Authorization: token {token}']  # 別ホストへの転送時には curl が自動で外す
+    cmd = ['curl', '-sSL', '--retry', '2', '-o', out, '-w', '%{http_code} %{content_type}', '-A', 'Mozilla/5.0']
+    if token:
+        cmd += ['-H', f'Authorization: Bearer {token}']  # 別ホストへの転送時には curl が自動で外す
     cmd.append(url)
     res = subprocess.run(cmd, capture_output=True, text=True)
     code, _, ctype = res.stdout.partition(' ')
     data = Path(out).read_bytes()
     os.unlink(out)
-    ctype = ctype.split(';')[0].strip().lower()
-    if code != '200' or ctype not in EXT:
-        print(f'::warning::画像を取得できませんでした({code} {ctype}): {url}')
-        return None
-    return data, EXT[ctype]
+    return code, ctype.split(';')[0].strip().lower(), data
+
+
+def download(url: str) -> tuple[bytes, str] | None:
+    # 公開リポジトリの添付画像は認証なしで取れる。だめなら GITHUB_TOKEN 付きでもう一度
+    tokens = [None]
+    token = os.environ.get('GITHUB_TOKEN') or os.environ.get('GH_TOKEN')
+    if token and url.startswith('https://github.com/'):
+        tokens.append(token)
+    for t in tokens:
+        code, ctype, data = fetch(url, t)
+        if code == '200' and ctype in EXT:
+            return data, EXT[ctype]
+    print(f'::warning::画像を取得できませんでした({code} {ctype}): {url}')
+    return None
 
 
 def year_of(path: Path) -> str:
