@@ -11,11 +11,21 @@ const research = (await getCollection('research')).sort((a, b) => a.data.order -
 const pubs = (await getCollection('publications', ({ data }) => data.type === '論文' || data.type === '国際学会'))
   .sort((a, b) => (b.data.date ?? String(b.data.year)).localeCompare(a.data.date ?? String(a.data.year)))
   .slice(0, 5);
-const newsHref = (n: any) => (n.data.legacy_url && !n.body?.trim() ? n.data.legacy_url : url(`/news/${n.id}/`));
+// HERO の写真(順番に切り替わる)。pos は写真のどこを中心に切り抜くか(横 縦)
+const heroSlides = [
+  { src: '/images/hero/material.jpg', pos: '30% 60%' },
+  { src: '/images/hero/group.jpg', pos: '55% 45%' },
+  { src: '/images/hero/device.jpg', pos: '50% 48%' },
+];
+const newsHref =(n: any) => (n.data.legacy_url && !n.body?.trim() ? n.data.legacy_url : url(`/news/${n.id}/`));
 ---
 <Base overlayHeader current="/">
   <section class="hero" aria-label="トップ">
-    <img class="hero-bg" src={url('/images/hero.jpg')} alt="" fetchpriority="high" />
+    <div class="hero-slides" aria-hidden="true">
+      {heroSlides.map((s, i) => (
+        <img class="hero-bg" src={url(s.src)} alt="" style={`object-position:${s.pos}`} fetchpriority={i === 0 ? 'high' : 'low'} loading={i === 0 ? 'eager' : 'lazy'} decoding="async" />
+      ))}
+    </div>
     <div class="hero-scrim"></div>
     <div class="hero-main">
       <div class="wrap">

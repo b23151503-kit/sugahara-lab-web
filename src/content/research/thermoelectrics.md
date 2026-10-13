@@ -3,16 +3,18 @@ title: Thermoelectrics
 title_ja: 熱電変換技術
 order: 30
 summary: 環境中の廃熱を電気に変える熱電変換で、IoTセンサのための自律分散型電源の実現を目指します。
-image: https://kit-sugahara-lab.net/wp-content/uploads/2022/07/図_自立分散型IoT電源-300x210.png
+image: /images/research/thermo-module-flexible.jpg
 ---
 
 ## IoTのための自律電源
 
 Society 5.0 では、電池交換が難しい場所にも大量のIoTセンサが置かれるため、自律した電源が必要になります。当研究室では、環境中の廃熱を電気に変える熱電変換によって、IoT機器向けの自律分散型電源システムの実現を目指しています。
 
-![自立分散型IoT電源](https://kit-sugahara-lab.net/wp-content/uploads/2022/07/図_自立分散型IoT電源-300x210.png)
-
 ## フレキシブル熱電変換モジュール
+
+![曲げられるフレキシブル熱電変換モジュール](/images/research/thermo-module-flexible.jpg)
+
+![円筒に巻き付けたフレキシブル熱電変換モジュール](/images/research/thermo-module-cylinder.jpg)
 
 大面積・高効率で機械的信頼性も備えたフレキシブル熱電変換モジュール(2018年発表)と、その小型・軽量化(2020年発表)に取り組んできました。
 

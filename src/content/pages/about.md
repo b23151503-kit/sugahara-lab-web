@@ -2,7 +2,7 @@
 title: 研究室について
 title_en: About
 lead: 材料化学を基盤に、材料・デバイスとその製造プロセス技術を研究しています。
-image: https://kit-sugahara-lab.net/wp-content/uploads/2023/09/2023年春研究室集合写真-05-10-15.52.19-scaled-e1695801808276-1024x709.jpg
+image: /images/lab/group-indoor.jpg
 ---
 
 菅原研究室は、大阪大学 産業科学研究所 先端実装材料研究分野の後継として2020年4月に発足し、2022年4月から京都工芸繊維大学で活動しています。

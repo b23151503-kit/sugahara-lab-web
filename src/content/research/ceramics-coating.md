@@ -3,14 +3,14 @@ title: Ceramics Coating
 title_ja: セラミックスコーティング
 order: 10
 summary: 金属酸化物セラミックスの薄膜を印刷法で基板上に形成し、ガスセンサやTFT、太陽電池などのデバイスに応用します。
-image: https://kit-sugahara-lab.net/wp-content/uploads/2022/07/図1-セラミックスコーティング光焼成-1024x426.png
+image: /images/research/ceramics-pi-film.jpg
 ---
 
 ## 印刷法による酸化物薄膜
 
 有機金属錯体を含む前駆体溶液を基板に塗布し、焼成することで、金属酸化物セラミックスの薄膜を形成する技術を研究しています。応用先は、半導体式ガスセンサ、薄膜トランジスタ(TFT)、太陽電池などの電子デバイスです。
 
-![光焼成装置](https://kit-sugahara-lab.net/wp-content/uploads/2022/07/光焼成装置-1024x555.png)
+![ポリイミド(PI)フィルム上に形成した薄膜と、その断面の電子顕微鏡像(右端はルチル型の格子像)](/images/research/ceramics-pi-sem-tem.jpg)
 
 ## 表面のナノ構造化
 

@@ -2,35 +2,47 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
+import { url } from '../lib/site';
 
-const all = (await getCollection('members', ({ data }) => data.status === '在籍')).sort(
-  (a, b) => a.data.order - b.data.order,
+const byOrder = (a: any, b: any) => a.data.order - b.data.order;
+const current = (await getCollection('members', ({ data }) => data.status === '在籍')).sort(byOrder);
+const alumni = (await getCollection('members', ({ data }) => data.status === '卒業・修了')).sort(
+  (a, b) => (b.data.graduated ?? '').localeCompare(a.data.graduated ?? '') || byOrder(a, b),
 );
-const faculty = all.filter((m) => ['教授', '准教授', '助教', '特任教員'].includes(m.data.role));
+
+const faculty = current.filter((m) => ['教授', '准教授', '助教', '特任教員'].includes(m.data.role));
 const groups = [
-  { label: 'スタッフ Staff', roles: ['研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント'] },
-  { label: '博士課程 Doctoral Course', roles: ['博士課程'] },
-  { label: '修士課程 Master Course', roles: ['修士課程'] },
-  { label: '学部生 Undergraduate', roles: ['学部生'] },
-  { label: '研究生 Research Student', roles: ['研究生'] },
+  { label: 'スタッフ', en: 'Staff', roles: ['研究員', '技術補佐員', '事務補佐員'] },
+  { label: '博士課程', en: 'Doctoral Course', roles: ['博士課程'] },
+  { label: '修士課程', en: 'Master Course', roles: ['修士課程'] },
+  { label: '学部生', en: 'Undergraduate', roles: ['学部生'] },
+  { label: '研究生', en: 'Research Student', roles: ['研究生'] },
+  { label: 'リサーチアシスタント(学生アルバイト)', en: 'Research Assistant', roles: ['リサーチアシスタント'] },
 ]
-  .map((g) => ({ ...g, people: all.filter((m) => g.roles.includes(m.data.role)) }))
+  .map((g) => ({ ...g, people: current.filter((m) => g.roles.includes(m.data.role)) }))
   .filter((g) => g.people.length > 0);
+// 研究室メンバーの人数(リサーチアシスタントは数えない)
+const count = current.filter((m) => m.data.role !== 'リサーチアシスタント').length;
 ---
 <Base title="メンバー" current="/members/">
-  <PageHead kicker="Members" title="メンバー" lead={`現在 ${all.length} 名が在籍しています。`} />
+  <PageHead kicker="Members" title="メンバー" lead={`現在 ${count} 名が在籍しています。`} />
   <section class="section">
     <div class="wrap">
+      <figure class="members-photo">
+        <img src={url('/images/lab/group-2026-outdoor.jpg')} alt="菅原研究室メンバーの集合写真" width="1600" height="1067" loading="lazy" />
+      </figure>
+
       {faculty.map((m) => (
         <div class="pi">
-          <span class="note" style="font-size:13px;font-weight:700;color:var(--gold-text)">{m.data.role}{m.data.note && ` · ${m.data.note}`}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--gold-text)">{m.data.role}{m.data.note && ` · ${m.data.note}`}</span>
           <span class="n">{m.data.name}</span>
           <span style="font-family:var(--sans);color:var(--muted)">{m.data.name_en}</span>
         </div>
       ))}
+
       {groups.map((g) => (
         <div class="member-group">
-          <h3>{g.label}</h3>
+          <h3>{g.label} <span class="en">{g.en}</span></h3>
           <ul class="member-grid">
             {g.people.map((m) => (
               <li>
@@ -42,6 +54,21 @@ const groups = [
           </ul>
         </div>
       ))}
+
+      {alumni.length > 0 && (
+        <div class="member-group alumni">
+          <h3>卒業生・修了生 <span class="en">Alumni</span></h3>
+          <ul class="member-grid">
+            {alumni.map((m) => (
+              <li>
+                <div class="n">{m.data.name}</div>
+                <div class="e">{m.data.name_en}</div>
+                <div class="note">{m.data.role}{m.data.graduated && ` · ${m.data.graduated.replace('-', '.')} 修了`}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   </section>
 </Base>

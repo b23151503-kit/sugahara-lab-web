@@ -26,7 +26,7 @@ const previewLabel = process.env.PREVIEW_LABEL;
   <meta property="og:title" content={fullTitle} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content={new URL(url('/images/hero.jpg'), Astro.site)} />
+  <meta property="og:image" content={new URL(url('/images/hero/group.jpg'), Astro.site)} />
   <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,14 +40,31 @@ const previewLabel = process.env.PREVIEW_LABEL;
         <b>{SITE.name}</b>
         <small>{SITE.university} {SITE.nameJa}</small>
       </a>
-      <nav class="site-nav" aria-label="メインメニュー">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="メニューを開く">
+        <span class="bars" aria-hidden="true"></span>
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="メインメニュー">
         {NAV.map((n) => (
-          <a href={url(n.href)} aria-current={current === n.href ? 'page' : undefined}>{n.label}</a>
+          <a href={url(n.href)} aria-current={current === n.href ? 'page' : undefined}>{n.label}<span class="ja">{n.ja}</span></a>
         ))}
-        <a class="contact" href={url('/contact/')} aria-current={current === '/contact/' ? 'page' : undefined}>Contact</a>
+        <a class="contact" href={url('/contact/')} aria-current={current === '/contact/' ? 'page' : undefined}>Contact<span class="ja">お問い合わせ</span></a>
       </nav>
     </div>
   </header>
+  <script is:inline>
+    (() => {
+      const btn = document.querySelector('.menu-btn');
+      const header = document.querySelector('.site-header');
+      if (!btn || !header) return;
+      const set = (open) => {
+        header.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
+        btn.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+      };
+      btn.addEventListener('click', () => set(!header.classList.contains('open')));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+    })();
+  </script>
 
   <main id="main">
     <slot />

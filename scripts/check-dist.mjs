@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const dist = 'dist';
-const required = ['index.html', 'news/index.html', 'research/index.html', 'members/index.html', 'publications/index.html', 'contact/index.html', 'about/index.html', 'images/hero.jpg', 'admin/index.html', 'admin/config.yml', '.htaccess'];
+const required = ['index.html', 'news/index.html', 'research/index.html', 'members/index.html', 'publications/index.html', 'contact/index.html', 'about/index.html', 'images/hero/material.jpg', 'images/hero/group.jpg', 'images/hero/device.jpg', 'admin/index.html', 'admin/config.yml', '.htaccess'];
 const missing = required.filter((f) => !existsSync(join(dist, f)));
 
 let pages = 0;
