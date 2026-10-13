@@ -2,7 +2,7 @@
 // 著者欄の「桂 章皓」「Akihiro Katsura」「A. Katsura」のどれでも同じ人として扱う。
 // 表記が特殊な場合は、メンバーの YAML に aliases(別表記)を書けば一致させられる。
 
-const norm = (s: string) =>
+export const norm = (s: string) =>
   s
     .normalize('NFKC')
     .toLowerCase()
@@ -31,6 +31,19 @@ export function nameKeys(m: { data: { name: string; name_en?: string; aliases?: 
 export function authorsToMembers(authors: string[], members: any[]): string[] {
   const authorKeys = new Set(authors.map(norm));
   return members.filter((m) => nameKeys(m).some((k) => authorKeys.has(k))).map((m) => m.id);
+}
+
+/** その業績の筆頭著者(著者欄の1人目)がメンバーなら、その id */
+export function firstAuthorMember(authors: string[], members: any[]): string | undefined {
+  if (!authors.length) return undefined;
+  const k = norm(authors[0]);
+  return members.find((m) => nameKeys(m).includes(k))?.id;
+}
+
+/** その人が筆頭著者か(著者欄の1人目) */
+export function isFirstAuthor(pub: any, member: any): boolean {
+  const a = pub.data.authors[0];
+  return !!a && nameKeys(member).includes(norm(a));
 }
 
 /** メンバー id → その人の業績一覧 */

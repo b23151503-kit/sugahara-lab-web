@@ -203,11 +203,16 @@ main { display: block; }
 .md-close { flex: none; width: 44px; height: 44px; margin: -8px -12px 0 0; background: none; border: 0; color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }
 .md-body { padding: 8px 28px 28px; }
 .md-body .info { margin: 16px 0 8px; }
-.md-sec h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 15px; }
-.md-sec h3 span { font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 600; }
+.md-block { margin-top: 28px; }
+.md-block-title { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 8px 12px; background: var(--ink); color: #fff; font-size: 15px; }
+.md-block-title .en { font-family: var(--sans); font-size: 12px; font-weight: 500; color: #c9cdd1; }
+.md-block-title .n { margin-left: auto; font-family: var(--sans); font-size: 12px; color: var(--gold); }
+.md-sec h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 15px; }
+.md-sec h4 span { font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 600; }
 .md-sec .pub-list li { padding: 12px 0; }
 .md-sec .pub-title { font-size: 14px; }
 .md-sec .pub-meta { font-size: 12px; }
+.md-sec .pub-meta b { color: var(--ink); background: rgba(226,167,46,.25); font-weight: 700; }
 .md-empty { color: var(--muted); margin: 20px 0; }
 @media (max-width: 640px) {
   .md-head, .md-body { padding-left: 18px; padding-right: 18px; }
@@ -218,6 +223,8 @@ main { display: block; }
 .pub-search label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; color: var(--muted); }
 .pub-search select, .pub-search input { font: inherit; font-size: 15px; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); min-width: 220px; }
 .pub-search input { min-width: min(320px, 100%); }
+.pub-search select:disabled { opacity: .5; }
+#f-role { min-width: 180px; }
 .pub-count { font-size: 14px; color: var(--muted); margin: 0 0 8px; }
 .pub-empty { color: var(--muted); padding: 24px 0; }
 
