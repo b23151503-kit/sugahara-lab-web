@@ -1,0 +1,38 @@
+# 旧 WordPress サイトのページを取得して legacy-raw ブランチに保存する(移行作業用・手動実行)。
+name: Fetch legacy site
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download pages
+        run: |
+          mkdir -p raw/html raw/api && cd raw
+          B=https://kit-sugahara-lab.net
+          for y in 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025; do
+            curl -sSL -A "Mozilla/5.0 (lab-site migration)" "$B/publications-articles/${y}fy/" -o "html/${y}fy.html" || true
+          done
+          curl -sSL "$B/2026fy/" -o html/2026fy.html || true
+          for p in publications-articles/donation-failed awards current obog members equipments; do
+            curl -sSL "$B/$p/" -o "html/$(echo $p | tr '/' '_').html" || true
+          done
+          # WordPress の API(使えれば本文がきれいに取れる)
+          for page in 1 2 3; do
+            curl -sSL "$B/wp-json/wp/v2/pages?per_page=100&page=$page" -o "api/pages-$page.json" || true
+            curl -sSL "$B/wp-json/wp/v2/posts?per_page=100&page=$page" -o "api/posts-$page.json" || true
+          done
+          ls -la html api
+      - name: Save to legacy-raw branch
+        run: |
+          cd raw
+          git init -q -b legacy-raw
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "legacy site snapshot $(date -u +%F)"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" legacy-raw
