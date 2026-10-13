@@ -54,8 +54,6 @@ jobs:
             sed 's/\x1b\[[0-9;]*m//g' build.log | grep -vE "^\s+at " | grep -iE "error|invalid|failed|expected|unexpected|does not match|\.astro|\.ts:|\.yml" | head -12 | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           fi
-          # 研究テーマの見直し候補を警告として表示(配信は止めない)
-          sed 's/\x1b\[[0-9;]*m//g' build.log | grep -a "\[研究テーマ要見直し\]" | sort -u | sed 's/^.*\[研究テーマ要見直し\] /::warning title=研究テーマの見直し候補::/' || true
 
       - name: Font subset
         run: |

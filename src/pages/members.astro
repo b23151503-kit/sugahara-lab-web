@@ -4,17 +4,11 @@ import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import MemberCard from '../components/MemberCard.astro';
 import { url } from '../lib/site';
-import { pubsByMember, sortPubs, alumniLabel, themeReview } from '../lib/people';
+import { pubsByMember, sortPubs, alumniLabel } from '../lib/people';
 
 const byOrder = (a: any, b: any) => a.data.order - b.data.order;
 const allMembers = await getCollection('members');
-const allPubs = await getCollection('publications');
-const pubMap = pubsByMember(sortPubs(allPubs), allMembers);
-
-// 研究テーマの見直し候補をビルドのログに出す(ワークフローが警告・PR の説明に転記する)
-for (const r of themeReview(allMembers, allPubs)) {
-  console.log(`[研究テーマ要見直し] ${r.member.data.name}(${r.member.id}): ${r.reason} — ${r.newer.slice(0, 3).map((p) => `${p.data.date ?? p.data.year} ${p.data.title}`).join(' / ')}`);
-}
+const pubMap = pubsByMember(sortPubs(await getCollection('publications')), allMembers);
 const pubsOf = (m: any) => pubMap.get(m.id) ?? [];
 
 const current = allMembers.filter((m) => m.data.status === '在籍').sort(byOrder);

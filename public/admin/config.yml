@@ -86,7 +86,6 @@ collections:
       - { label: 写真, name: photo, widget: image, required: false }
       - { label: 補足(学位、社会人DC など), name: note, widget: string, required: false }
       - { label: 研究テーマ(一文。名前の下に表示), name: theme, widget: string, required: false }
-      - { label: 研究テーマの根拠にした最新の筆頭業績の日付(例 2026-09-18), name: theme_basis, widget: string, required: false }
       - { label: researchmap の URL, name: researchmap, widget: string, required: false }
       - label: 経歴(年表)
         name: career
