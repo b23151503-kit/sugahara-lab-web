@@ -106,8 +106,8 @@ jobs:
           GEMINI_CLI_TRUST_WORKSPACE: 'true'
         with:
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-          # 無料枠で使えるのは Flash 系だけ(Pro は無料枠が0)。変えたいときは Variables の GEMINI_MODEL で指定
-          gemini_model: ${{ vars.GEMINI_MODEL || 'gemini-flash-latest' }}
+          # 無料枠: Pro は使えない。Flash は1日20回程度。Flash-Lite は回数が多い。変えたいときは Variables の GEMINI_MODEL で指定
+          gemini_model: ${{ vars.GEMINI_MODEL || 'gemini-flash-lite-latest' }}
           settings: |
             {
               "context": { "fileName": ["AGENTS.md"] },
