@@ -15,7 +15,9 @@ const pubs = (await getCollection('publications', ({ data }) => data.type === 'è
 const heroSlides = [
   { src: '/images/hero/material.jpg', pos: '30% 60%' },
   { src: '/images/hero/group.jpg', pos: '55% 45%' },
+  { src: '/images/hero/lab.jpg', pos: '55% 50%' },
   { src: '/images/hero/device.jpg', pos: '50% 48%' },
+  { src: '/images/hero/room.jpg', pos: '60% 55%' },
 ];
 const newsHref =(n: any) => (n.data.legacy_url && !n.body?.trim() ? n.data.legacy_url : url(`/news/${n.id}/`));
 ---
