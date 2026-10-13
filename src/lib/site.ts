@@ -15,6 +15,7 @@ export const SITE = {
 export const NAV = [
   { href: '/about/', label: 'About', ja: '研究室について' },
   { href: '/research/', label: 'Research', ja: '研究内容' },
+  { href: '/facilities/', label: 'Facilities', ja: '研究設備' },
   { href: '/news/', label: 'News', ja: 'お知らせ' },
   { href: '/members/', label: 'Members', ja: 'メンバー' },
   { href: '/publications/', label: 'Publications', ja: '業績' },

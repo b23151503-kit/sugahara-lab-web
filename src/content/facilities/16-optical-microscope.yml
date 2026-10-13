@@ -1,0 +1,5 @@
+name: 光学顕微鏡
+model: Leica
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/optical-microscope.jpg
+order: 160

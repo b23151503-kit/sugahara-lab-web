@@ -22,6 +22,7 @@ AI が触ってよいのは原則として `src/content/` と `public/uploads/` 
 | `src/content/publications/` | 業績 1 件 1 ファイル | YAML |
 | `src/content/members/` | メンバー 1 人 1 ファイル | YAML |
 | `src/content/research/` | 研究テーマ | Markdown |
+| `src/content/facilities/` | 研究設備 1 台 1 ファイル | YAML |
 | `src/content/pages/` | 固定ページ(about) | Markdown |
 | `public/uploads/YYYY/` | 記事の画像 | jpg / png |
 | `inbox/` | 人がメモ・写真・BibTeX を置く場所 | 何でも |
@@ -97,6 +98,20 @@ aliases: [ミクッチ ダニエレ]   # 任意。業績の著者欄の別表記
 
 - 卒業・修了したメンバーはファイルを消さず `status: 卒業・修了` と `graduated: 2026`(卒業・修了・退職した年)にする。メンバーページでは年ごとにまとめて表示される。
 - 進級(学部生→修士課程など)は `role` を書き換える。
+
+## 研究設備(facilities)
+
+ファイル名: `番号-英数字の短い名前.yml`(例 `20-spin-coater.yml`)。写真は `public/images/facilities/` に置く。
+
+```yaml
+name: スピンコーター          # 装置名。分からなければ "" (ページには「名称準備中」と出る)
+model: ミカサ Opticoat MS-B150 # 任意。メーカー・型番
+description: ""               # 任意。ひとこと説明
+image: /images/facilities/spin-coater.jpg
+order: 20                     # 小さいほど前
+```
+
+- 装置名や型番を写真から推測で書かない。依頼に書かれたものだけ入れる。
 
 ## inbox の処理
 

@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { url } from '../lib/site';
+
+const items = (await getCollection('facilities')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="研究設備" current="/facilities/">
+  <PageHead kicker="Facilities" title="研究設備" lead="研究室で使用している主な装置を紹介します。" />
+  <div class="facility-hero">
+    <img src={url('/images/facilities/lab-overview.jpg')} alt="菅原研究室の実験室" width="1600" height="1200" />
+  </div>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>研究設備 <span>Equipment</span></h2>
+      </div>
+      <ul class="facility-grid">
+        {items.map((f) => (
+          <li class="facility">
+            <div class="ph"><img src={url(f.data.image)} alt={f.data.name || '研究設備'} loading="lazy" width="1200" height="900" /></div>
+            <div class="tx">
+              {f.data.name ? <h3>{f.data.name}</h3> : <h3 class="tbd">名称準備中</h3>}
+              {f.data.model && <p class="model">{f.data.model}</p>}
+              {f.data.description && <p class="desc">{f.data.description}</p>}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>

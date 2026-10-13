@@ -1,0 +1,5 @@
+name: 電気炉
+model: KDF P-90
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/furnace.jpg
+order: 50

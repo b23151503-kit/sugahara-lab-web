@@ -71,6 +71,18 @@ const research = defineCollection({
   }),
 });
 
+// 研究設備: src/content/facilities/*.yml (1台1ファイル)。name が空なら「名称準備中」と表示
+const facilities = defineCollection({
+  loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/facilities' }),
+  schema: z.object({
+    name: z.string().optional().default(''), // 装置名
+    model: z.string().optional().default(''), // メーカー・型番
+    description: z.string().optional().default(''), // ひとこと説明
+    image: z.string(),
+    order: z.number().default(100),
+  }),
+});
+
 // 固定ページ: src/content/pages/*.md (about など)
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
@@ -82,4 +94,4 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { news, publications, members, research, pages };
+export const collections = { news, publications, members, research, facilities, pages };

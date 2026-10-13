@@ -1,0 +1,5 @@
+name: 万能試験機
+model: 島津製作所
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/tensile-tester.jpg
+order: 180

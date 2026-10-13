@@ -1,0 +1,5 @@
+name: 真空プラズマ処理装置
+model: 魁半導体
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/plasma.jpg
+order: 30

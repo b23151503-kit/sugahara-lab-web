@@ -1,0 +1,5 @@
+name: ""   # 装置名(分かったら入れる)
+model: SMT-64RH
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/smt-64rh.jpg
+order: 140

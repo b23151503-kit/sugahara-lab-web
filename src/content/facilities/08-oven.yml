@@ -1,0 +1,5 @@
+name: 乾燥器
+model: アズワン ETTAS EO-450V
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/oven.jpg
+order: 80

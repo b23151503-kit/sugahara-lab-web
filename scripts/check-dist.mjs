@@ -3,7 +3,7 @@ import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const dist = 'dist';
-const required = ['index.html', 'news/index.html', 'research/index.html', 'members/index.html', 'publications/index.html', 'contact/index.html', 'about/index.html', 'images/hero/material.jpg', 'images/hero/group.jpg', 'images/hero/device.jpg', 'images/hero/lab.jpg', 'images/hero/room.jpg', 'admin/index.html', 'admin/config.yml', '.htaccess'];
+const required = ['index.html', 'news/index.html', 'research/index.html', 'members/index.html', 'publications/index.html', 'contact/index.html', 'about/index.html', 'facilities/index.html', 'images/hero/material.jpg', 'images/hero/group.jpg', 'images/hero/device.jpg', 'images/hero/lab.jpg', 'images/hero/room.jpg', 'admin/index.html', 'admin/config.yml', '.htaccess'];
 // 配信用のビルド(GitHub Actions)ではフォントも必須
 if (process.env.GITHUB_ACTIONS && process.env.SKIP_FONT_CHECK !== '1') required.push('fonts/monapo.woff2');
 const missing = required.filter((f) => !existsSync(join(dist, f)));

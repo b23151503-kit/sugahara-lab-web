@@ -1,0 +1,5 @@
+name: 真空蒸着装置
+model: VE-2020
+description: ""   # ひとこと説明(任意)
+image: /images/facilities/evaporator.jpg
+order: 150
