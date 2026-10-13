@@ -126,7 +126,6 @@ collections:
     summary: "{{order}} {{name}}"
     fields:
       - { label: 装置名(分からなければ空欄。「名称準備中」と表示), name: name, widget: string, required: false }
-      - { label: メーカー・型番, name: model, widget: string, required: false }
       - { label: ひとこと説明, name: description, widget: text, required: false }
       - { label: 写真, name: image, widget: image }
       - { label: 並び順(小さいほど前), name: order, widget: number, value_type: int, default: 100 }

@@ -1,5 +1,4 @@
 name: 卓上走査電子顕微鏡(SEM)
-model: 日本電子(JEOL)
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/sem.jpg
 order: 110

@@ -170,7 +170,6 @@ main { display: block; }
 .facility .tx { padding: 16px 18px 20px; }
 .facility h3 { margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; }
 .facility h3.tbd { color: var(--muted); font-weight: 500; }
-.facility .model { margin: 4px 0 0; font-family: var(--sans); font-size: 13px; color: var(--muted); }
 .facility .desc { margin: 10px 0 0; font-size: 14px; line-height: 1.8; color: var(--ink-2); }
 
 /* publications */

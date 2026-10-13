@@ -22,7 +22,6 @@ const items = (await getCollection('facilities')).sort((a, b) => a.data.order - 
             <div class="ph"><img src={url(f.data.image)} alt={f.data.name || '研究設備'} loading="lazy" width="1200" height="900" /></div>
             <div class="tx">
               {f.data.name ? <h3>{f.data.name}</h3> : <h3 class="tbd">名称準備中</h3>}
-              {f.data.model && <p class="model">{f.data.model}</p>}
               {f.data.description && <p class="desc">{f.data.description}</p>}
             </div>
           </li>

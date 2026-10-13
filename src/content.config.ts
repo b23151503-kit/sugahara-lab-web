@@ -76,7 +76,6 @@ const facilities = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/facilities' }),
   schema: z.object({
     name: z.string().optional().default(''), // 装置名
-    model: z.string().optional().default(''), // メーカー・型番
     description: z.string().optional().default(''), // ひとこと説明
     image: z.string(),
     order: z.number().default(100),

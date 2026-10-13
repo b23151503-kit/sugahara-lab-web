@@ -1,5 +1,4 @@
 name: 自動研磨装置
-model: Buehler AutoMet 250
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/polisher.jpg
 order: 90

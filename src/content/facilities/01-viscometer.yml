@@ -1,5 +1,4 @@
 name: 粘度計
-model: 東機産業 TV-100
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/viscometer.jpg
 order: 10

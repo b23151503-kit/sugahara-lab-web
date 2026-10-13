@@ -1,5 +1,4 @@
 name: ボンドテスター
-model: Nordson DAGE
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/bond-tester.jpg
 order: 70
