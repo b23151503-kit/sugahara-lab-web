@@ -16,7 +16,7 @@ const fy = (p: any) => {
   return m >= 4 ? Number(d.slice(0, 4)) : Number(d.slice(0, 4)) - 1;
 };
 const years = [...new Set(pubs.map(fy))].sort((a, b) => b - a);
-const types = ['論文', '総説・解説', '国際学会', '国内学会', '招待講演', '受賞', '特許'].filter((t) =>
+const types = ['論文', '総説・解説', '書籍', '国際学会', '国内学会', '招待講演', '受賞', '特許'].filter((t) =>
   pubs.some((p) => p.data.type === t),
 );
 

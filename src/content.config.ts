@@ -19,7 +19,7 @@ const news = defineCollection({
 const publications = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/publications' }),
   schema: z.object({
-    type: z.enum(['論文', '総説・解説', '国際学会', '国内学会', '招待講演', '受賞', '特許']),
+    type: z.enum(['論文', '総説・解説', '書籍', '国際学会', '国内学会', '招待講演', '受賞', '特許']),
     authors: z.array(z.string()).min(1),
     title: z.string(),
     venue: z.string(),
