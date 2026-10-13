@@ -147,7 +147,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pip install --quiet pillow || true
+          python3 -m pip install --quiet --break-system-packages pillow || true
           python3 scripts/localize-images.py
 
       - uses: actions/setup-node@v4
