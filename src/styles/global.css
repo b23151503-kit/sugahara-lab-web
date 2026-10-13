@@ -288,7 +288,3 @@ main { display: block; }
 /* ポップアップ: 6件目以降を開くボタン */
 .show-more { display: block; width: 100%; min-height: 44px; margin-top: 8px; font: inherit; font-size: 13px; font-weight: 700; color: var(--ink); background: transparent; border: 1px dashed #b9bcb5; cursor: pointer; }
 .show-more:hover { border-style: solid; border-color: var(--ink); }
-
-/* ポップアップの「さらに表示」 */
-.show-more { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin-top: 8px; font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); background: #f1f0ec; border: 1px solid var(--line); cursor: pointer; }
-.show-more:hover { border-color: var(--ink); }

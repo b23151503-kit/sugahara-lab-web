@@ -93,15 +93,6 @@ const alumniYears = [...new Set(alumniStudents.map(yearOf))]
         dlg.querySelector('.md-close').addEventListener('click', () => dlg.close());
         // 外側(暗い部分)を押しても閉じる
         dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-        // 「さらに表示」: 6件目以降を開閉
-        dlg.querySelectorAll('.show-more').forEach((b) => {
-          b.addEventListener('click', () => {
-            const open = b.getAttribute('aria-expanded') !== 'true';
-            b.closest('.md-sec').querySelectorAll('.more-item').forEach((li) => { li.hidden = !open; });
-            b.setAttribute('aria-expanded', String(open));
-            b.innerHTML = open ? '閉じる <span aria-hidden="true">−</span>' : 'さらに表示 <span aria-hidden="true">＋</span>';
-          });
-        });
         // 「それ以前の〇〇を表示」で、6件目以降を開閉
         dlg.querySelectorAll('.show-more').forEach((more) => {
           more.addEventListener('click', () => {
