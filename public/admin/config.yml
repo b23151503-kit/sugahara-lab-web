@@ -77,12 +77,12 @@ collections:
       - label: 区分
         name: role
         widget: select
-        options: [教授, 准教授, 助教, 特任教員, 研究員, 技術補佐員, 事務補佐員, リサーチアシスタント, 博士課程, 修士課程, 学部生, 研究生]
+        options: [教授, 准教授, 助教, 特任教員, 研究員, 技術補佐員, 事務補佐員, リサーチアシスタント, 博士課程, 修士課程, 学部生, 研究生, 研究室生]
       - { label: 在籍状況, name: status, widget: select, options: [在籍, 卒業・修了], default: 在籍 }
       - { label: 並び順(小さいほど上), name: order, widget: number, value_type: int, default: 100 }
       - { label: 写真, name: photo, widget: image, required: false }
-      - { label: 補足(学位など), name: note, widget: string, required: false }
-      - { label: 卒業・修了年月, name: graduated, widget: string, required: false }
+      - { label: 補足(学位、社会人DC など), name: note, widget: string, required: false }
+      - { label: 卒業・修了・退職した年(例 2026), name: graduated, widget: string, required: false }
 
   - name: research
     label: 研究テーマ

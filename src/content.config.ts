@@ -38,12 +38,13 @@ const members = defineCollection({
   schema: z.object({
     name: z.string(),
     name_en: z.string().optional(),
-    role: z.enum(['教授', '准教授', '助教', '特任教員', '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント', '博士課程', '修士課程', '学部生', '研究生']),
+    role: z.enum(['教授', '准教授', '助教', '特任教員', '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント', '博士課程', '修士課程', '学部生', '研究生', '研究室生']),
     status: z.enum(['在籍', '卒業・修了']).default('在籍'),
     order: z.number().default(100),
     photo: z.string().optional(),
     note: z.string().optional(),
-    graduated: z.string().optional(),
+    // 卒業・修了/退職した年(例: 2026 や 2026-03)。在籍中は書かない
+    graduated: z.coerce.string().optional(),
   }),
 });
 

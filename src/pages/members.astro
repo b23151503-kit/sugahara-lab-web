@@ -10,6 +10,14 @@ const alumni = (await getCollection('members', ({ data }) => data.status === '�
   (a, b) => (b.data.graduated ?? '').localeCompare(a.data.graduated ?? '') || byOrder(a, b),
 );
 
+// 卒業生は年ごとに、元スタッフは別にまとめる
+const staffRoles = ['教授', '准教授', '助教', '特任教員', '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント'];
+const formerStaff = alumni.filter((m) => staffRoles.includes(m.data.role));
+const alumniStudents = alumni.filter((m) => !staffRoles.includes(m.data.role));
+const yearOf = (m: any) => (m.data.graduated ? `${String(m.data.graduated).slice(0, 4)}年` : '年不明');
+const alumniYears = [...new Set(alumniStudents.map(yearOf))]
+  .sort((a, b) => b.localeCompare(a))
+  .map((y) => [y, alumniStudents.filter((m) => yearOf(m) === y)] as const);
 const faculty = current.filter((m) => ['教授', '准教授', '助教', '特任教員'].includes(m.data.role));
 const groups = [
   { label: 'スタッフ', en: 'Staff', roles: ['研究員', '技術補佐員', '事務補佐員'] },
@@ -55,15 +63,35 @@ const count = current.filter((m) => m.data.role !== 'リサーチアシスタン
         </div>
       ))}
 
-      {alumni.length > 0 && (
+      {alumniYears.length > 0 && (
         <div class="member-group alumni">
           <h3>卒業生・修了生 <span class="en">Alumni</span></h3>
+          {alumniYears.map(([year, people]) => (
+            <div class="alumni-year">
+              <h4>{year}</h4>
+              <ul class="member-grid">
+                {people.map((m) => (
+                  <li>
+                    <div class="n">{m.data.name}</div>
+                    <div class="e">{m.data.name_en}</div>
+                    <div class="note">{m.data.note ?? (m.data.role === '研究室生' ? '元研究室生' : m.data.role)}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {formerStaff.length > 0 && (
+        <div class="member-group alumni">
+          <h3>元スタッフ <span class="en">Former Staff</span></h3>
           <ul class="member-grid">
-            {alumni.map((m) => (
+            {formerStaff.map((m) => (
               <li>
                 <div class="n">{m.data.name}</div>
                 <div class="e">{m.data.name_en}</div>
-                <div class="note">{m.data.role}{m.data.graduated && ` · ${m.data.graduated.replace('-', '.')} 修了`}</div>
+                <div class="note">{m.data.role}{m.data.graduated && ` · ${m.data.graduated}年まで`}</div>
               </li>
             ))}
           </ul>
