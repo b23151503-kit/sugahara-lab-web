@@ -22,8 +22,8 @@ concurrency:
 
 jobs:
   tidy-and-preview:
-    # 外部(フォーク)からの PR では動かさない
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    # 外部(フォーク)からの PR と、このワークフロー自身の片付けコミットでは動かさない
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'github-actions[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: write
