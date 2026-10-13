@@ -40,8 +40,11 @@ AI の変更案は、**マージするまで本番には出ません**。
    - 小さな修正なら、ファイル右上の「…」→ **Edit file** でその場で直せる。
 4. **見た目を確認**: 変更案ができて数分後、プレビュー
    `https://b23151503-kit.github.io/sugahara-lab-web/`
-   に変更案の内容が表示される(左下に「プレビュー表示中(ブランチ: ai/…)」)。
-   - 表示されないときは **Actions → Preview → Run workflow** で、Branch 欄に変更案のブランチ名(プルリクエストの上部に出ている `ai/...`)を入れて実行。
+   に変更案の内容が表示される(左下に「プレビュー表示中(ブランチ: ai/… や copilot/…)」)。変更案が更新されるたびに自動で表示し直す。
+   - Copilot の変更案で、PR 画面に **Approve and run workflows** というボタンが出ていたら押す(押すとプレビューが動く)。
+   - それでも表示されないときは **Actions → PR preview → Run workflow** で、欄に変更案のブランチ名を入れて実行。
+     ブランチ名は PR のタイトルではなく、タイトルの下の「… into main from ○○」の **○○(青い文字)** の部分。
+   - Issue に貼った画像は、このとき自動でサイト内(`public/uploads/`)に保存される。
 5. 問題なければ Conversation タブ下の **Merge pull request → Confirm merge**。2〜3 分でサーバーに反映される。
 6. やめるときは **Close pull request**。
 

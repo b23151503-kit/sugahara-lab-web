@@ -1,7 +1,7 @@
 # 本番サーバーに送る前に、見た目を確認するためのプレビュー。
 # GitHub Pages(https://<ユーザー名>.github.io/sugahara-lab-web/)に公開される。
 #  - main が更新されると自動で main の内容を表示
-#  - AI の変更案ができると、その変更案の内容を表示
+#  - AI の変更案(プルリクエスト)ができる・更新されると、その変更案の内容を表示(pr-preview.yml から呼ばれる)
 #  - Actions → Preview → Run workflow でブランチ名を指定すれば、任意の変更案を表示
 name: Preview
 

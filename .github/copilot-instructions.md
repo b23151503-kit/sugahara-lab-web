@@ -6,3 +6,5 @@
 - 変更後は `npm run build && npm run check:dist` が通ることを確認してください。
 - `.github/workflows/` と `public/.htaccess` は、頼まれない限り変更しません。
 - プルリクエストの説明は日本語で書いてください。
+- Issue に貼られた画像(github.com/user-attachments/...)は、ダウンロードして `public/uploads/YYYY/` に英数字の名前で保存し、`/uploads/YYYY/xxx.jpg` で参照してください。添付画像のアドレスをそのまま書かないでください。
+- `package-lock.json` はコミットしないでください。
