@@ -3,9 +3,11 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import PubItem from '../components/PubItem.astro';
+import { authorsToMembers, sortPubs } from '../lib/people';
 
-const key = (p: any) => p.data.date ?? String(p.data.year);
-const pubs = (await getCollection('publications')).sort((a, b) => key(b).localeCompare(key(a)));
+const pubs = sortPubs(await getCollection('publications'));
+const members = await getCollection('members');
+
 // 年度(4月始まり)でまとめる
 const fy = (p: any) => {
   const d = p.data.date;
@@ -17,42 +19,96 @@ const years = [...new Set(pubs.map(fy))].sort((a, b) => b - a);
 const types = ['論文', '総説・解説', '国際学会', '国内学会', '招待講演', '受賞', '特許'].filter((t) =>
   pubs.some((p) => p.data.type === t),
 );
+
+// 業績ごとに、著者に含まれるメンバー
+const who = new Map(pubs.map((p) => [p.id, authorsToMembers(p.data.authors, members)]));
+const counts = new Map<string, number>();
+for (const ids of who.values()) for (const id of ids) counts.set(id, (counts.get(id) ?? 0) + 1);
+const order = (m: any) => (m.data.status === '在籍' ? 0 : 1) * 10000 + m.data.order;
+const people = members.filter((m) => counts.has(m.id)).sort((a, b) => order(a) - order(b));
+const searchText = (p: any) =>
+  [p.data.title, p.data.venue, p.data.authors.join(' '), p.data.note ?? '', p.data.type].join(' ').toLowerCase();
 ---
 <Base title="業績" current="/publications/">
-  <PageHead kicker="Publications" title="業績" lead={`論文・学会発表など ${pubs.length} 件(年度別)。`} />
+  <PageHead kicker="Publications" title="業績" lead={`論文・学会発表・受賞など ${pubs.length} 件(年度別)。メンバーの名前や言葉で検索できます。`} />
   <section class="section">
     <div class="wrap">
+      <div class="pub-search">
+        <label>メンバー
+          <select id="f-member">
+            <option value="">すべてのメンバー</option>
+            <optgroup label="在籍">
+              {people.filter((m) => m.data.status === '在籍').map((m) => <option value={m.id}>{m.data.name}({counts.get(m.id)})</option>)}
+            </optgroup>
+            <optgroup label="卒業生・元スタッフ">
+              {people.filter((m) => m.data.status !== '在籍').map((m) => <option value={m.id}>{m.data.name}({counts.get(m.id)})</option>)}
+            </optgroup>
+          </select>
+        </label>
+        <label>キーワード
+          <input id="f-text" type="search" placeholder="例: graphene、応用物理学会" autocomplete="off" />
+        </label>
+      </div>
       <div class="filters" role="group" aria-label="種別で絞り込み">
         <button type="button" data-filter="" aria-pressed="true">すべて</button>
         {types.map((t) => <button type="button" data-filter={t} aria-pressed="false">{t}</button>)}
       </div>
+      <p class="pub-count" id="f-count" aria-live="polite">{pubs.length} 件</p>
+
       {years.map((y) => (
         <div class="fy-block">
           <h2 class="year-head">{y}年度</h2>
           <ul class="pub-list">
             {pubs.filter((p) => fy(p) === y).map((p) => (
-              <li data-type={p.data.type}><PubItem pub={p} /></li>
+              <li data-type={p.data.type} data-members={(who.get(p.id) ?? []).join(' ')} data-text={searchText(p)}>
+                <PubItem pub={p} />
+              </li>
             ))}
           </ul>
         </div>
       ))}
+      <p class="pub-empty" id="f-empty" hidden>条件に合う業績はありません。</p>
     </div>
   </section>
   <script is:inline>
     (() => {
+      const member = document.getElementById('f-member');
+      const text = document.getElementById('f-text');
       const btns = document.querySelectorAll('.filters button');
+      const items = [...document.querySelectorAll('.pub-list li')];
+      const blocks = document.querySelectorAll('.fy-block');
+      let type = '';
+      const apply = () => {
+        const m = member.value;
+        const words = text.value.toLowerCase().split(/\s+/).filter(Boolean);
+        let n = 0;
+        items.forEach((li) => {
+          const ok =
+            (!type || li.dataset.type === type) &&
+            (!m || li.dataset.members.split(' ').includes(m)) &&
+            words.every((w) => li.dataset.text.includes(w));
+          li.hidden = !ok;
+          if (ok) n++;
+        });
+        blocks.forEach((b) => { b.hidden = ![...b.querySelectorAll('li')].some((li) => !li.hidden); });
+        document.getElementById('f-count').textContent = `${n} 件`;
+        document.getElementById('f-empty').hidden = n > 0;
+        const q = new URLSearchParams(location.search);
+        m ? q.set('member', m) : q.delete('member');
+        history.replaceState(null, '', q.toString() ? `?${q}` : location.pathname);
+      };
       btns.forEach((b) =>
         b.addEventListener('click', () => {
-          const f = b.dataset.filter;
+          type = b.dataset.filter;
           btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-          document.querySelectorAll('.pub-list li').forEach((li) => {
-            li.hidden = !!f && li.dataset.type !== f;
-          });
-          document.querySelectorAll('.fy-block').forEach((blk) => {
-            blk.hidden = ![...blk.querySelectorAll('li')].some((li) => !li.hidden);
-          });
+          apply();
         }),
       );
+      member.addEventListener('change', apply);
+      text.addEventListener('input', apply);
+      // メンバーページからのリンク(?member=...)に対応
+      const init = new URLSearchParams(location.search).get('member');
+      if (init && [...member.options].some((o) => o.value === init)) { member.value = init; apply(); }
     })();
   </script>
 </Base>

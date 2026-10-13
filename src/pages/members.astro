@@ -2,23 +2,23 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
+import MemberCard from '../components/MemberCard.astro';
 import { url } from '../lib/site';
+import { pubsByMember, sortPubs, alumniLabel } from '../lib/people';
 
 const byOrder = (a: any, b: any) => a.data.order - b.data.order;
-const current = (await getCollection('members', ({ data }) => data.status === '在籍')).sort(byOrder);
-const alumni = (await getCollection('members', ({ data }) => data.status === '卒業・修了')).sort(
-  (a, b) => (b.data.graduated ?? '').localeCompare(a.data.graduated ?? '') || byOrder(a, b),
-);
+const allMembers = await getCollection('members');
+const pubMap = pubsByMember(sortPubs(await getCollection('publications')), allMembers);
+const pubsOf = (m: any) => pubMap.get(m.id) ?? [];
 
-// 卒業生は年ごとに、元スタッフは別にまとめる
-const staffRoles = ['教授', '准教授', '助教', '特任教員', '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント'];
-const formerStaff = alumni.filter((m) => staffRoles.includes(m.data.role));
-const alumniStudents = alumni.filter((m) => !staffRoles.includes(m.data.role));
-const yearOf = (m: any) => (m.data.graduated ? `${String(m.data.graduated).slice(0, 4)}年` : '年不明');
-const alumniYears = [...new Set(alumniStudents.map(yearOf))]
-  .sort((a, b) => b.localeCompare(a))
-  .map((y) => [y, alumniStudents.filter((m) => yearOf(m) === y)] as const);
-const faculty = current.filter((m) => ['教授', '准教授', '助教', '特任教員'].includes(m.data.role));
+const current = allMembers.filter((m) => m.data.status === '在籍').sort(byOrder);
+const alumni = allMembers
+  .filter((m) => m.data.status === '卒業・修了')
+  .sort((a, b) => (b.data.graduated ?? '').localeCompare(a.data.graduated ?? '') || byOrder(a, b));
+
+const facultyRoles = ['教授', '准教授', '助教', '特任教員'];
+const staffRoles = [...facultyRoles, '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント'];
+const faculty = current.filter((m) => facultyRoles.includes(m.data.role));
 const groups = [
   { label: 'スタッフ', en: 'Staff', roles: ['研究員', '技術補佐員', '事務補佐員'] },
   { label: '博士課程', en: 'Doctoral Course', roles: ['博士課程'] },
@@ -29,36 +29,33 @@ const groups = [
 ]
   .map((g) => ({ ...g, people: current.filter((m) => g.roles.includes(m.data.role)) }))
   .filter((g) => g.people.length > 0);
-// 研究室メンバーの人数(リサーチアシスタントは数えない)
 const count = current.filter((m) => m.data.role !== 'リサーチアシスタント').length;
+
+// 卒業生は年ごとに、元スタッフは別にまとめる
+const formerStaff = alumni.filter((m) => staffRoles.includes(m.data.role));
+const alumniStudents = alumni.filter((m) => !staffRoles.includes(m.data.role));
+const yearOf = (m: any) => (m.data.graduated ? `${String(m.data.graduated).slice(0, 4)}年` : '年不明');
+const alumniYears = [...new Set(alumniStudents.map(yearOf))]
+  .sort((a, b) => b.localeCompare(a))
+  .map((y) => [y, alumniStudents.filter((m) => yearOf(m) === y)] as const);
 ---
 <Base title="メンバー" current="/members/">
-  <PageHead kicker="Members" title="メンバー" lead={`現在 ${count} 名が在籍しています。`} />
+  <PageHead kicker="Members" title="メンバー" lead={`現在 ${count} 名が在籍しています。名前を押すと、論文・学会発表・受賞などの実績が見られます。`} />
   <section class="section">
     <div class="wrap">
       <figure class="members-photo">
         <img src={url('/images/lab/group-2026-outdoor.jpg')} alt="菅原研究室メンバーの集合写真" width="1600" height="1067" loading="lazy" />
       </figure>
 
-      {faculty.map((m) => (
-        <div class="pi">
-          <span style="font-size:13px;font-weight:700;color:var(--gold-text)">{m.data.role}{m.data.note && ` · ${m.data.note}`}</span>
-          <span class="n">{m.data.name}</span>
-          <span style="font-family:var(--sans);color:var(--muted)">{m.data.name_en}</span>
-        </div>
-      ))}
+      <ul class="member-grid pi-grid">
+        {faculty.map((m) => <MemberCard m={m} pubs={pubsOf(m)} big />)}
+      </ul>
 
       {groups.map((g) => (
         <div class="member-group">
           <h3>{g.label} <span class="en">{g.en}</span></h3>
           <ul class="member-grid">
-            {g.people.map((m) => (
-              <li>
-                <div class="n">{m.data.name}</div>
-                <div class="e">{m.data.name_en}</div>
-                {g.roles.length > 1 && <div class="note">{m.data.role}</div>}
-              </li>
-            ))}
+            {g.people.map((m) => <MemberCard m={m} pubs={pubsOf(m)} sub={g.roles.length > 1 ? m.data.role : undefined} />)}
           </ul>
         </div>
       ))}
@@ -70,13 +67,7 @@ const count = current.filter((m) => m.data.role !== 'リサーチアシスタン
             <div class="alumni-year">
               <h4>{year}</h4>
               <ul class="member-grid">
-                {people.map((m) => (
-                  <li>
-                    <div class="n">{m.data.name}</div>
-                    <div class="e">{m.data.name_en}</div>
-                    <div class="note">{m.data.note ?? (m.data.role === '研究室生' ? '元研究室生' : m.data.role)}</div>
-                  </li>
-                ))}
+                {people.map((m) => <MemberCard m={m} pubs={pubsOf(m)} sub={`${alumniLabel(m.data.role)}${m.data.note ? `(${m.data.note})` : ''}`} />)}
               </ul>
             </div>
           ))}
@@ -87,16 +78,22 @@ const count = current.filter((m) => m.data.role !== 'リサーチアシスタン
         <div class="member-group alumni">
           <h3>元スタッフ <span class="en">Former Staff</span></h3>
           <ul class="member-grid">
-            {formerStaff.map((m) => (
-              <li>
-                <div class="n">{m.data.name}</div>
-                <div class="e">{m.data.name_en}</div>
-                <div class="note">{m.data.role}{m.data.graduated && ` · ${m.data.graduated}年まで`}</div>
-              </li>
-            ))}
+            {formerStaff.map((m) => <MemberCard m={m} pubs={pubsOf(m)} sub={`${m.data.role}${m.data.graduated ? ` · ${m.data.graduated}年まで` : ''}`} />)}
           </ul>
         </div>
       )}
     </div>
   </section>
+  <script is:inline>
+    (() => {
+      document.querySelectorAll('.member-open').forEach((btn) => {
+        const dlg = document.getElementById(btn.dataset.dialog);
+        if (!dlg || !dlg.showModal) return;
+        btn.addEventListener('click', () => dlg.showModal());
+        dlg.querySelector('.md-close').addEventListener('click', () => dlg.close());
+        // 外側(暗い部分)を押しても閉じる
+        dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+      });
+    })();
+  </script>
 </Base>

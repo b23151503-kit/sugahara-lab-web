@@ -1,0 +1,61 @@
+---
+// メンバー1人ぶんのカード。押すと実績(論文・学会発表・受賞)のポップアップが開く。
+import PubItem from './PubItem.astro';
+import { url } from '../lib/site';
+import { alumniLabel } from '../lib/people';
+
+interface Props { m: any; pubs: any[]; sub?: string; big?: boolean }
+const { m, pubs, sub, big = false } = Astro.props;
+const d = m.data;
+const isAlumni = d.status === '卒業・修了';
+const roleText = isAlumni ? alumniLabel(d.role) : d.role;
+const sections = [
+  { label: '論文・解説', types: ['論文', '総説・解説'] },
+  { label: '学会発表', types: ['招待講演', '国際学会', '国内学会'] },
+  { label: '受賞', types: ['受賞'] },
+  { label: '特許', types: ['特許'] },
+]
+  .map((s) => ({ ...s, items: pubs.filter((p) => s.types.includes(p.data.type)) }))
+  .filter((s) => s.items.length > 0);
+const dialogId = `member-${m.id}`;
+---
+<li class:list={['member-card', { big }]}>
+  <button type="button" class="member-open" data-dialog={dialogId} aria-haspopup="dialog">
+    {big && <span class="role">{d.role}{d.note && ` · ${d.note}`}</span>}
+    <span class="n">{d.name}</span>
+    <span class="e">{d.name_en}</span>
+    {sub && <span class="note">{sub}</span>}
+    {d.theme && <span class="theme">{d.theme}</span>}
+    <span class="count">{pubs.length > 0 ? `実績 ${pubs.length} 件` : '詳細'} <span aria-hidden="true">＋</span></span>
+  </button>
+  <dialog id={dialogId} class="member-dialog" aria-labelledby={`${dialogId}-title`}>
+    <div class="md-head">
+      <div>
+        <div class="md-role">{roleText}{d.graduated && isAlumni && ` · ${d.graduated}年`}{d.note && ` · ${d.note}`}</div>
+        <h2 id={`${dialogId}-title`}>{d.name}</h2>
+        <div class="md-en">{d.name_en}</div>
+      </div>
+      <button type="button" class="md-close" aria-label="閉じる">×</button>
+    </div>
+    <div class="md-body">
+      {(d.theme || d.career) && (
+        <dl class="info">
+          {d.theme && <><dt>研究テーマ</dt><dd>{d.theme}</dd></>}
+          {d.career && <><dt>経歴</dt><dd style="white-space:pre-line">{d.career}</dd></>}
+        </dl>
+      )}
+      {sections.map((s) => (
+        <section class="md-sec">
+          <h3>{s.label}<span>{s.items.length} 件</span></h3>
+          <ul class="pub-list">
+            {s.items.map((p) => <li><PubItem pub={p} showType={s.types.length > 1} /></li>)}
+          </ul>
+        </section>
+      ))}
+      {sections.length === 0 && <p class="md-empty">まだ登録された実績はありません。</p>}
+      {pubs.length > 0 && (
+        <p><a class="more" href={url(`/publications/?member=${m.id}`)}>業績ページでこの人の実績を検索 →</a></p>
+      )}
+    </div>
+  </dialog>
+</li>

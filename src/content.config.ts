@@ -43,6 +43,9 @@ const members = defineCollection({
     order: z.number().default(100),
     photo: z.string().optional(),
     note: z.string().optional(),
+    theme: z.string().optional(), // 研究テーマ
+    career: z.string().optional(), // 学歴・経歴・進路など(自由記述)
+    aliases: z.array(z.string()).optional(), // 業績の著者欄での別表記(例: ミクッチ ダニエレ)
     // 卒業・修了/退職した年(例: 2026 や 2026-03)。在籍中は書かない
     graduated: z.coerce.string().optional(),
   }),
