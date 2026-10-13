@@ -31,7 +31,7 @@ const searchText = (p: any) =>
   [p.data.title, p.data.venue, p.data.authors.join(' '), p.data.note ?? '', p.data.type].join(' ').toLowerCase();
 ---
 <Base title="業績" current="/publications/">
-  <PageHead kicker="Publications" title="業績" lead={`論文・学会発表・受賞など ${pubs.length} 件(年度別)。メンバーの名前(筆頭著者・共著の区別も)や言葉で検索できます。`} />
+  <PageHead kicker="Publications" title="業績" lead="論文・学会発表・受賞などを年度別に掲載しています。メンバーの名前(筆頭著者・共著の区別も)や言葉で検索できます。" />
   <section class="section">
     <div class="wrap">
       <div class="pub-search">
@@ -39,10 +39,10 @@ const searchText = (p: any) =>
           <select id="f-member">
             <option value="">すべてのメンバー</option>
             <optgroup label="在籍">
-              {people.filter((m) => m.data.status === '在籍').map((m) => <option value={m.id}>{m.data.name}({counts.get(m.id)})</option>)}
+              {people.filter((m) => m.data.status === '在籍').map((m) => <option value={m.id}>{m.data.name}</option>)}
             </optgroup>
             <optgroup label="卒業生・元スタッフ">
-              {people.filter((m) => m.data.status !== '在籍').map((m) => <option value={m.id}>{m.data.name}({counts.get(m.id)})</option>)}
+              {people.filter((m) => m.data.status !== '在籍').map((m) => <option value={m.id}>{m.data.name}</option>)}
             </optgroup>
           </select>
         </label>
@@ -61,7 +61,7 @@ const searchText = (p: any) =>
         <button type="button" data-filter="" aria-pressed="true">すべて</button>
         {types.map((t) => <button type="button" data-filter={t} aria-pressed="false">{t}</button>)}
       </div>
-      <p class="pub-count" id="f-count" aria-live="polite">{pubs.length} 件</p>
+      <p class="pub-count" id="f-count" aria-live="polite"></p>
 
       {years.map((y) => (
         <div class="fy-block">
@@ -103,7 +103,8 @@ const searchText = (p: any) =>
           if (ok) n++;
         });
         blocks.forEach((b) => { b.hidden = ![...b.querySelectorAll('li')].some((li) => !li.hidden); });
-        document.getElementById('f-count').textContent = `${n} 件`;
+        const filtered = !!(type || m || words.length);
+        document.getElementById('f-count').textContent = filtered ? `該当 ${n} 件` : '';
         document.getElementById('f-empty').hidden = n > 0;
         const q = new URLSearchParams(location.search);
         m ? q.set('member', m) : q.delete('member');

@@ -40,7 +40,7 @@ const alumniYears = [...new Set(alumniStudents.map(yearOf))]
   .map((y) => [y, alumniStudents.filter((m) => yearOf(m) === y)] as const);
 ---
 <Base title="メンバー" current="/members/">
-  <PageHead kicker="Members" title="メンバー" lead={`現在 ${count} 名が在籍しています。名前を押すと、論文・学会発表・受賞などの実績が見られます。`} />
+  <PageHead kicker="Members" title="メンバー" lead={`現在 ${count} 名が在籍しています。「詳細 ＋」のあるメンバーは、押すと実績などを見られます。`} />
   <section class="section">
     <div class="wrap">
       <figure class="members-photo">

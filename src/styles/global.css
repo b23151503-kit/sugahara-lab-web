@@ -189,6 +189,13 @@ main { display: block; }
 .member-open .count { margin-top: auto; padding-top: 10px; font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--muted); display: flex; justify-content: space-between; }
 .member-open:hover .count { color: var(--ink); }
 .member-group.alumni .member-open { background: transparent; }
+/* 詳細のない人: 押せないカード(枠を薄く、ホバーなし) */
+.member-open.is-static { cursor: default; background: transparent; border-style: dashed; border-color: #cfd2cc; padding-bottom: 16px; }
+.member-open.is-static:hover { border-color: #cfd2cc; }
+.member-open .kw, .kw { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.kw span { font-size: 11px; line-height: 1.5; padding: 1px 7px; background: #efece4; color: var(--ink-2); border-radius: 2px; }
+.kw-dark span { background: rgba(255,255,255,.12); color: #e6e8ea; }
+.ext-link { color: var(--gold-text); text-decoration: underline; text-underline-offset: 3px; word-break: break-all; }
 .pi-grid { grid-template-columns: minmax(0, 1fr); }
 .member-card.big .member-open { padding: 28px; }
 .member-card.big .n { font-size: 26px; }
@@ -206,7 +213,6 @@ main { display: block; }
 .md-block { margin-top: 28px; }
 .md-block-title { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 8px 12px; background: var(--ink); color: #fff; font-size: 15px; }
 .md-block-title .en { font-family: var(--sans); font-size: 12px; font-weight: 500; color: #c9cdd1; }
-.md-block-title .n { margin-left: auto; font-family: var(--sans); font-size: 12px; color: var(--gold); }
 .md-sec h4 { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 0; padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-size: 15px; }
 .md-sec h4 span { font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 600; }
 .md-sec .pub-list li { padding: 12px 0; }
