@@ -1,4 +1,4 @@
-name: オートマウンター
-description: ""   # ひとこと説明(任意)
+name: オートチップマウンター
+description: ''
 image: /images/facilities/smt-64rh.jpg
 order: 140
