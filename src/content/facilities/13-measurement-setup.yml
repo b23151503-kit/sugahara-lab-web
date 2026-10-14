@@ -1,4 +1,4 @@
-name: ""   # 装置名(分かったら入れる)
+name: 熱電特性評価装置
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/measurement-setup.jpg
 order: 130

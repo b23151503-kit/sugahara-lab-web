@@ -1,4 +1,4 @@
-name: ""   # 装置名(分かったら入れる)
+name: 接触抵抗測定装置
 description: ""   # ひとこと説明(任意)
 image: /images/facilities/apollowave.jpg
 order: 120
