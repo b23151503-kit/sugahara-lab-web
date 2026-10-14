@@ -11,6 +11,16 @@ backend:
 locale: ja
 media_folder: public/uploads
 public_folder: /uploads
+# アップロードした写真を自動で縮小(スマホ写真は大きすぎるため)
+media_libraries:
+  default:
+    config:
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 1600
+          height: 1600
 
 collections:
   - name: news
@@ -31,7 +41,8 @@ collections:
         widget: select
         options: [学会発表, 受賞, 論文, プレス, 研究活動, 研究室生活, お知らせ]
         default: お知らせ
-      - { label: アイキャッチ画像, name: image, widget: image, required: false }
+      - { label: 記事の写真(一覧にも出る1枚), name: image, widget: image, required: false }
+      - { label: 本文の下に並べる写真(何枚でも), name: gallery, widget: image, multiple: true, required: false }
       - { label: 下書き(公開しない), name: draft, widget: boolean, default: false, required: false }
       - { label: 旧サイトの記事URL(本文がない旧記事のみ), name: legacy_url, widget: string, required: false }
       - { label: 本文, name: body, widget: markdown, required: false }

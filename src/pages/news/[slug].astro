@@ -21,6 +21,11 @@ const { Content } = await render(entry);
       <article class="prose">
         {entry.data.image && <img src={url(entry.data.image)} alt="" />}
         <Content />
+        {(entry.data.gallery?.length ?? 0) > 0 && (
+          <div class="news-gallery">
+            {entry.data.gallery!.map((g: string) => <img src={url(g)} alt="" loading="lazy" />)}
+          </div>
+        )}
       </article>
       <p style="margin-top:48px"><a class="more" href={url('/news/')}>← お知らせ一覧へ</a></p>
     </div>

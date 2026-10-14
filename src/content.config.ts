@@ -9,6 +9,7 @@ const news = defineCollection({
     date: z.coerce.date(),
     category: z.enum(['学会発表', '受賞', '論文', 'プレス', '研究活動', '研究室生活', 'お知らせ']).default('お知らせ'),
     image: z.string().optional(),
+    gallery: z.union([z.string(), z.array(z.string())]).transform((v) => (Array.isArray(v) ? v : [v])).optional(), // 本文の下にタイル状に並べる写真
     // 旧WordPressサイトの記事URL(本文が未移行の記事のみ)
     legacy_url: z.string().url().optional(),
     draft: z.boolean().default(false),
