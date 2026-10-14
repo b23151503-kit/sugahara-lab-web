@@ -1,4 +1,4 @@
-name: ""   # 装置名(分かったら入れる)
-description: ""   # ひとこと説明(任意)
+name: スプレーコーター
+description: ''
 image: /images/facilities/ari-giken.jpg
 order: 60
