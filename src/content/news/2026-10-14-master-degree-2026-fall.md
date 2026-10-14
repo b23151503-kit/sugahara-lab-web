@@ -2,10 +2,8 @@
 title: 祁天宇（キ テンウ）君と李之衡(リ シコウ)君が修了しました！
 date: 2026-09-25
 category: お知らせ
-image: ''
-gallery: []
+image: /uploads/2026/master-degree-2026-fall.jpg
 draft: false
-legacy_url: ''
 ---
 
 9/7に行われた修論発表会を終えた後、9/25に祁天宇（キ テンウ）君と李之衡(リ シコウ)君の博士前期課程修了が認められ修士の学位授与が行われました。

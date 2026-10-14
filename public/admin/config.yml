@@ -9,6 +9,9 @@ backend:
     delete: "{{collection}}: 「{{slug}}」を削除"
 
 locale: ja
+# 空欄の項目はファイルに書かない
+output:
+  omit_empty_optional_fields: true
 media_folder: public/uploads
 public_folder: /uploads
 # アップロードした写真を自動で縮小(スマホ写真は大きすぎるため)

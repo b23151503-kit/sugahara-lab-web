@@ -1,10 +1,20 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// 管理画面(Sveltia CMS)は空欄を '' や null で保存するので、空欄は「書いていない」として扱う
+const clean = <T extends z.ZodRawShape>(shape: T) =>
+  z.preprocess(
+    (o) =>
+      o && typeof o === 'object' && !Array.isArray(o)
+        ? Object.fromEntries(Object.entries(o as Record<string, unknown>).filter(([, v]) => v !== '' && v !== null))
+        : o,
+    z.object(shape),
+  );
+
 // お知らせ: src/content/news/YYYY-MM-DD-xxx.md (1記事1ファイル)
 const news = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/news' }),
-  schema: z.object({
+  schema: clean({
     title: z.string(),
     date: z.coerce.date(),
     category: z.enum(['学会発表', '受賞', '論文', 'プレス', '研究活動', '研究室生活', 'お知らせ']).default('お知らせ'),
@@ -19,7 +29,7 @@ const news = defineCollection({
 // 業績: src/content/publications/*.yml (1件1ファイル)
 const publications = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/publications' }),
-  schema: z.object({
+  schema: clean({
     type: z.enum(['論文', '総説・解説', '書籍', '国際学会', '国内学会', '招待講演', '受賞', 'その他', '特許']),
     authors: z.array(z.string()).min(1),
     title: z.string(),
@@ -39,7 +49,7 @@ const publications = defineCollection({
 // メンバー: src/content/members/*.yml (1人1ファイル)
 const members = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/members' }),
-  schema: z.object({
+  schema: clean({
     name: z.string(),
     name_en: z.string().optional(),
     role: z.enum(['教授', '准教授', '助教', '特任教員', '研究員', '技術補佐員', '事務補佐員', 'リサーチアシスタント', '博士課程', '修士課程', '学部生', '研究生', '研究室生']),
@@ -63,7 +73,7 @@ const members = defineCollection({
 // 研究テーマ: src/content/research/*.md
 const research = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/research' }),
-  schema: z.object({
+  schema: clean({
     title: z.string(),
     title_ja: z.string(),
     order: z.number().default(10),
@@ -75,7 +85,7 @@ const research = defineCollection({
 // 研究設備: src/content/facilities/*.yml (1台1ファイル)。name が空なら「名称準備中」と表示
 const facilities = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './src/content/facilities' }),
-  schema: z.object({
+  schema: clean({
     name: z.string().optional().default(''), // 装置名
     description: z.string().optional().default(''), // ひとこと説明
     image: z.string(),
@@ -86,7 +96,7 @@ const facilities = defineCollection({
 // 固定ページ: src/content/pages/*.md (about など)
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
-  schema: z.object({
+  schema: clean({
     title: z.string(),
     title_en: z.string().optional(),
     lead: z.string().optional(),
