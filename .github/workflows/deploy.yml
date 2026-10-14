@@ -55,6 +55,35 @@ jobs:
             exit 1
           fi
 
+      - name: Shrink large photos
+        # 管理画面などから大きな写真が入っても、配信するものは長い辺 1600px に縮める(元のファイルはそのまま)
+        run: |
+          python3 -m pip install --quiet --break-system-packages pillow || true
+          python3 - <<'PY'
+          from pathlib import Path
+          try:
+              from PIL import Image, ImageOps
+          except ImportError:
+              raise SystemExit(0)
+          n = 0
+          for p in Path('dist/uploads').rglob('*'):
+              if p.suffix.lower() not in ('.jpg', '.jpeg', '.png', '.webp'):
+                  continue
+              try:
+                  im = ImageOps.exif_transpose(Image.open(p))
+                  if max(im.size) <= 1600 and p.stat().st_size < 800_000:
+                      continue
+                  im.thumbnail((1600, 1600))
+                  if p.suffix.lower() in ('.jpg', '.jpeg'):
+                      im.convert('RGB').save(p, quality=84, optimize=True, progressive=True)
+                  else:
+                      im.save(p, optimize=True)
+                  n += 1
+              except Exception as e:
+                  print(f'skip {p}: {e}')
+          print(f'縮小した写真: {n} 枚')
+          PY
+
       - name: Font subset
         run: |
           export MONAPO_LICENSE=$(find /tmp/monapo -iname "copyright" | head -1)

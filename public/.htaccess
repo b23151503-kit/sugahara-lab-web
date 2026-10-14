@@ -33,3 +33,10 @@ ExpiresByType image/png "access plus 30 days"
 ExpiresByType image/svg+xml "access plus 30 days"
 ExpiresByType text/css "access plus 7 days"
 </IfModule>
+
+# 管理画面の設定はいつも最新を読み込む(古い設定が残らないように)
+<IfModule mod_headers.c>
+<FilesMatch "(config\.yml|index\.html)$">
+Header set Cache-Control "no-cache"
+</FilesMatch>
+</IfModule>
