@@ -1,0 +1,41 @@
+# 旧 WordPress のお知らせ記事(legacy_url のあるもの)の本文と写真を取得して legacy-posts ブランチに保存する(移行作業用・手動実行)。
+name: Fetch legacy posts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download posts and images
+        run: |
+          mkdir -p out/posts out/img
+          for f in src/content/news/*.md; do
+            u=$(grep -m1 '^legacy_url:' "$f" | sed 's/^legacy_url:[[:space:]]*//; s/^["'\'']//; s/["'\'']$//')
+            [ -z "$u" ] && continue
+            n=$(basename "$f" .md)
+            curl -sSL -A "Mozilla/5.0 (lab-site migration)" "$u" -o "out/posts/$n.html" || true
+            # 本文中の写真(サイズ違いの縮小版ではなく元の画像)
+            grep -oE 'https://kit-sugahara-lab\.net/wp-content/uploads/[^"'\'' ]+\.(jpe?g|png|JPE?G|PNG)' "out/posts/$n.html" \
+              | sed -E 's/-[0-9]+x[0-9]+(\.[a-zA-Z]+)$/\1/' | sort -u > "out/posts/$n.imgs" || true
+            while read -r img; do
+              p="out/img/${img#https://kit-sugahara-lab.net/wp-content/uploads/}"
+              mkdir -p "$(dirname "$p")"
+              [ -f "$p" ] || curl -sSL -A "Mozilla/5.0 (lab-site migration)" "$img" -o "$p" || true
+            done < "out/posts/$n.imgs"
+            sleep 1
+          done
+          du -sh out; ls out/posts | wc -l
+      - name: Save to legacy-posts branch
+        run: |
+          cd out
+          git init -q -b legacy-posts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "legacy posts snapshot $(date -u +%F)"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" legacy-posts
