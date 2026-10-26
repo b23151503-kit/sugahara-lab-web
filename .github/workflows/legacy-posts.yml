@@ -3,6 +3,11 @@ name: Fetch legacy posts
 
 on:
   workflow_dispatch:
+    inputs:
+      urls:
+        description: 追加で取得する画像のURL(空白区切り)。入れると記事の取得はせず、画像だけ legacy-extra ブランチに保存
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -12,7 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download extra images
+        if: inputs.urls != ''
+        env:
+          URLS: ${{ inputs.urls }}
+        run: |
+          mkdir -p extra
+          for u in $URLS; do
+            p="extra/${u#https://kit-sugahara-lab.net/wp-content/uploads/}"
+            mkdir -p "$(dirname "$p")"
+            curl -sSL -A "Mozilla/5.0 (lab-site migration)" "$u" -o "$p" -w "%{http_code} $u\n" || true
+          done
+          cd extra
+          git init -q -b legacy-extra
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "extra images"
+          git push -f -q "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" legacy-extra
       - name: Download posts and images
+        if: inputs.urls == ''
         run: |
           mkdir -p out/posts out/img
           for f in src/content/news/*.md; do
@@ -32,6 +55,7 @@ jobs:
           done
           du -sh out; ls out/posts | wc -l
       - name: Save to legacy-posts branch
+        if: inputs.urls == ''
         run: |
           cd out
           git init -q -b legacy-posts
