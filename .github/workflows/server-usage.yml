@@ -37,7 +37,8 @@ jobs:
           echo "== メール"; du -sh ~/*/mail ~/mail 2>/dev/null
           echo "== ログ"; du -sh ~/*/log ~/log 2>/dev/null
           SH
-          sed 's/^/  /' report.txt
+          echo "行数: $(wc -l < report.txt)"
+          grep -v 'Permanently added' report.txt > r2.txt || true; mv r2.txt report.txt
           # 画面上部(Annotations)にまとめて表示
-          msg=$(head -c 6000 report.txt | sed "s#$HOME##g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
+          msg=$(head -c 7000 report.txt | sed -E "s#/home/[^/]+#~#g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
           echo "::notice title=サーバー容量の内訳::$msg"
