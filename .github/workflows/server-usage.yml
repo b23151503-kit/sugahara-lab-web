@@ -1,0 +1,43 @@
+# サーバーの容量を何が使っているか調べる(読み取りだけ・何も消さない)。手動実行。
+name: Server disk usage
+
+on:
+  workflow_dispatch:
+
+jobs:
+  usage:
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+    steps:
+      - name: Measure
+        run: |
+          SSH_HOST=$(printf '%s' "$SSH_HOST" | tr -d '[:space:]')
+          SSH_PORT=$(printf '%s' "$SSH_PORT" | tr -d '[:space:]')
+          SSH_USER=$(printf '%s' "$SSH_USER" | tr -d '[:space:]')
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' | sed '/^[[:space:]]*$/d; s/^[[:space:]]*//; s/[[:space:]]*$//' > ~/.ssh/k && chmod 600 ~/.ssh/k
+          SSH="ssh -i $HOME/.ssh/k -p $SSH_PORT -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=20"
+          $SSH "$SSH_USER@$SSH_HOST" 'bash -s' > report.txt 2>&1 <<'SH'
+          cd ~
+          echo "== ホーム直下"; du -sh ./* ./.[!.]* 2>/dev/null | sort -rh | head -15
+          for d in ~/*/public_html; do
+            echo "== $d"; du -sh "$d"/* "$d"/.[!.]* 2>/dev/null | sort -rh | head -15
+            if [ -d "$d/wp-content" ]; then
+              echo "== $d/wp-content"; du -sh "$d"/wp-content/* 2>/dev/null | sort -rh | head -15
+              echo "== $d/wp-content/uploads"; du -sh "$d"/wp-content/uploads/* 2>/dev/null | sort -rh | head -15
+              echo "== 大きいファイル上位"; find "$d" -type f -size +20M -printf '%s\t%p\n' 2>/dev/null | sort -rn | head -15 | awk -F'\t' '{printf "%.0fMB\t%s\n", $1/1048576, $2}'
+              echo "== 画像の枚数(縮小版を含む)"; find "$d/wp-content/uploads" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) | wc -l
+              echo "== うち自動生成の縮小版(-数字x数字)"; find "$d/wp-content/uploads" -type f -regextype posix-extended -regex '.*-[0-9]+x[0-9]+\.(jpe?g|png|webp)' | wc -l
+            fi
+          done
+          echo "== メール"; du -sh ~/*/mail ~/mail 2>/dev/null
+          echo "== ログ"; du -sh ~/*/log ~/log 2>/dev/null
+          SH
+          sed 's/^/  /' report.txt
+          # 画面上部(Annotations)にまとめて表示
+          msg=$(head -c 6000 report.txt | sed "s#$HOME##g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
+          echo "::notice title=サーバー容量の内訳::$msg"
