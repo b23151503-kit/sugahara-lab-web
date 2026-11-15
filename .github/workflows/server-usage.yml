@@ -53,3 +53,5 @@ jobs:
           # 画面上部(Annotations)にまとめて表示
           msg=$(tail -c 7000 report.txt | sed -E "s#/home/[^/]+#~#g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
           echo "::notice title=サーバー容量の内訳::$msg"
+          m2=$(grep -A8 '切り替え準備' report.txt | sed -E "s#/home/[^/]+#~#g" | cut -c1-400); m2="${m2//'%'/'%25'}"; m2="${m2//$'\n'/'%0A'}"
+          echo "::notice title=切り替え準備::$m2"
