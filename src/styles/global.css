@@ -97,7 +97,7 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .eyebrow { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; color: #e6e8ea; }
 .eyebrow::before { content: ''; width: 36px; height: 2px; background: var(--gold); flex: none; }
 .hero h1 { margin: 0; max-width: 15em; font-family: var(--sans); font-weight: 600; font-size: clamp(34px, 5.4vw, 78px); line-height: 1.06; letter-spacing: -0.025em; }
-.hero p { margin: 0; max-width: 36em; line-height: 1.95; color: #e6e8ea; }
+.hero p { margin: 0; max-width: 42em; line-height: 1.95; color: #e6e8ea; }
 .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
 .btn { display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 26px; font-size: 15px; font-weight: 700; }
 .btn:hover { text-decoration: none; filter: brightness(1.08); }

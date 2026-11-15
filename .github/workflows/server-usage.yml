@@ -34,6 +34,17 @@ jobs:
               echo "== うち自動生成の縮小版(-数字x数字)"; find "$d/wp-content/uploads" -type f -regextype posix-extended -regex '.*-[0-9]+x[0-9]+\.(jpe?g|png|webp)' | wc -l
             fi
           done
+          echo "== 切り替え準備の確認(読み取りのみ)"
+          W=~/kit-sugahara-lab.net/public_html
+          echo "wp-cli: $(command -v wp || echo なし) / php: $(php -v 2>/dev/null | head -1)"
+          if command -v wp >/dev/null; then
+            echo "siteurl: $(wp --path=$W option get siteurl 2>&1 | tail -1)"
+            echo "home: $(wp --path=$W option get home 2>&1 | tail -1)"
+            echo "WP: $(wp --path=$W core version 2>&1 | tail -1) / DB: $(wp --path=$W db size --human-readable --format=csv 2>&1 | tail -1)"
+            echo "plugins: $(wp --path=$W plugin list --status=active --field=name 2>&1 | tr '\n' ' ')"
+          fi
+          echo ".htaccess 行数: $(wc -l < $W/.htaccess 2>/dev/null) / WordPressブロック: $(grep -c 'BEGIN WordPress' $W/.htaccess 2>/dev/null) / その他の設定行: $(grep -vc '^\s*#\|^\s*$' $W/.htaccess 2>/dev/null)"
+          echo "old フォルダ: $([ -e $W/old ] && echo あり || echo なし)"
           echo "== メール"; du -sh ~/*/mail ~/mail 2>/dev/null
           echo "== ログ"; du -sh ~/*/log ~/log 2>/dev/null
           SH
