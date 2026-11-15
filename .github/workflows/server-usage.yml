@@ -49,7 +49,7 @@ jobs:
           echo "== ログ"; du -sh ~/*/log ~/log 2>/dev/null
           SH
           echo "行数: $(wc -l < report.txt)"
-          grep -v 'Permanently added' report.txt > r2.txt || true; mv r2.txt report.txt
+          tr -d '\r' < report.txt | grep -v -e 'Permanently added' -e 'post-quantum' -e 'store now, decrypt later' -e 'server may need to be upgraded' > r2.txt || true; mv r2.txt report.txt
           # 画面上部(Annotations)にまとめて表示
-          msg=$(head -c 7000 report.txt | sed -E "s#/home/[^/]+#~#g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
+          msg=$(tail -c 7000 report.txt | sed -E "s#/home/[^/]+#~#g"); msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"
           echo "::notice title=サーバー容量の内訳::$msg"
